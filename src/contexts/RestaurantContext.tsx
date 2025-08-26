@@ -24,6 +24,7 @@ type RestaurantAction =
   | { type: 'ADD_PAYMENT'; payload: Payment }
   | { type: 'CLOSE_TABLE'; payload: string }
   | { type: 'ADD_SEAT'; payload: Seat }
+  | { type: 'ADD_TABLE'; payload: Table }
   | { type: 'LOAD_DATA'; payload: RestaurantState };
 
 const initialState: RestaurantState = {

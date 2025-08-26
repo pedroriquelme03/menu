@@ -4,8 +4,9 @@ import { TableCard } from './TableCard';
 import { PaymentModal } from './PaymentModal';
 import { QRCodeGenerator } from './QRCodeGenerator';
 import { QRCodeManager } from './QRCodeManager';
+import { CreateTableModal } from './CreateTableModal';
 import { Table } from '../../types';
-import { QrCode, Users, AlertCircle, DollarSign } from 'lucide-react';
+import { QrCode, Users, AlertCircle, DollarSign, Plus } from 'lucide-react';
 
 export const TablesView: React.FC = () => {
   const { state } = useRestaurant();
@@ -14,6 +15,7 @@ export const TablesView: React.FC = () => {
   const [showQRModal, setShowQRModal] = useState(false);
   const [selectedTableForQR, setSelectedTableForQR] = useState<Table | null>(null);
   const [showQRManager, setShowQRManager] = useState(false);
+  const [showCreateTableModal, setShowCreateTableModal] = useState(false);
 
   const occupiedTables = state.tables.filter(table => table.isOccupied);
   const availableTables = state.tables.filter(table => !table.isOccupied);
@@ -37,6 +39,11 @@ export const TablesView: React.FC = () => {
   const handleGenerateQR = (table: Table) => {
     setSelectedTableForQR(table);
     setShowQRModal(true);
+  };
+
+  const handleTableCreated = () => {
+    // Recarregar os dados das mesas
+    window.location.reload();
   };
 
   return (
@@ -119,13 +126,22 @@ export const TablesView: React.FC = () => {
             <QrCode className="w-6 h-6 text-blue-600" />
             Mesas Disponíveis ({availableTables.length})
           </h2>
-          <button
-            onClick={() => setShowQRManager(true)}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
-          >
-            <QrCode className="w-4 h-4" />
-            Gerenciar Todos os QR Codes
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setShowCreateTableModal(true)}
+              className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              Nova Mesa
+            </button>
+            <button
+              onClick={() => setShowQRManager(true)}
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+            >
+              <QrCode className="w-4 h-4" />
+              Gerenciar Todos os QR Codes
+            </button>
+          </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4">
           {availableTables.map((table) => (
@@ -177,6 +193,15 @@ export const TablesView: React.FC = () => {
       {showQRManager && (
         <QRCodeManager
           onClose={() => setShowQRManager(false)}
+        />
+      )}
+
+      {/* Create Table Modal */}
+      {showCreateTableModal && (
+        <CreateTableModal
+          isOpen={showCreateTableModal}
+          onClose={() => setShowCreateTableModal(false)}
+          onTableCreated={handleTableCreated}
         />
       )}
     </div>
