@@ -32,9 +32,11 @@ Após executar o schema, você deve ver as seguintes tabelas:
 No Vercel, certifique-se de que as seguintes variáveis estão configuradas:
 
 ```env
-VITE_SUPABASE_URL=https://seu-projeto.supabase.co
-VITE_SUPABASE_ANON_KEY=sua-chave-anonima
+VITE_SUPABASE_URL=https://rxhixzmvsaozyzlfxsbs.supabase.co
+VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ4aGl4em12c2Fvenl6bGZ4c2JzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYxNzcxMzIsImV4cCI6MjA3MTc1MzEzMn0.s83NeO_2eWLUMHPQ7Rwbf5KcJthNANnkOAes3RW70L8
 ```
+
+**Para desenvolvimento local**, crie um arquivo `.env` na raiz do projeto com as mesmas variáveis.
 
 ## 🔧 Estrutura das Tabelas
 
