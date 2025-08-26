@@ -1,8 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { QrCode, ChefHat, Asterisk as CashRegister, Users } from 'lucide-react';
+import { QrCode, ChefHat, Asterisk as CashRegister, Users, ChevronDown, ChevronUp } from 'lucide-react';
+import { useRestaurant } from '../contexts/RestaurantContext';
 
 export const HomePage: React.FC = () => {
+  const { state } = useRestaurant();
+  const [showTables, setShowTables] = useState(false);
+
+  // Filtrar mesas disponíveis (não ocupadas)
+  const availableTables = state.tables.filter(table => !table.isOccupied);
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-orange-100">
       <div className="container mx-auto px-4 py-12">
@@ -27,18 +33,48 @@ export const HomePage: React.FC = () => {
                 Escaneie o QR code da mesa e faça seus pedidos diretamente pelo celular
               </p>
               <div className="space-y-3">
-                <Link
-                  to="/table/table-1-demo123"
-                  className="block bg-orange-600 text-white px-6 py-3 rounded-xl hover:bg-orange-700 transition-colors font-semibold"
+                <button
+                  onClick={() => setShowTables(!showTables)}
+                  className="w-full bg-orange-600 text-white px-6 py-3 rounded-xl hover:bg-orange-700 transition-colors font-semibold flex items-center justify-center gap-2"
                 >
-                  Demo Mesa 1
-                </Link>
-                <Link
-                  to="/table/table-2-demo456"
-                  className="block bg-orange-100 text-orange-600 px-6 py-3 rounded-xl hover:bg-orange-200 transition-colors font-semibold"
-                >
-                  Demo Mesa 2
-                </Link>
+                  {showTables ? (
+                    <>
+                      <ChevronUp className="w-5 h-5" />
+                      Ocultar Mesas
+                    </>
+                  ) : (
+                    <>
+                      <ChevronDown className="w-5 h-5" />
+                      Escolher uma Mesa
+                    </>
+                  )}
+                </button>
+                
+                {showTables && (
+                  <div className="bg-gray-50 rounded-xl p-4 space-y-2 max-h-48 overflow-y-auto">
+                    {availableTables.length > 0 ? (
+                      availableTables.map((table) => (
+                        <Link
+                          key={table.id}
+                          to={`/table/${table.token}`}
+                          className="block bg-white text-gray-800 px-4 py-2 rounded-lg hover:bg-orange-50 transition-colors text-sm border border-gray-200"
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="font-medium">Mesa {table.number}</span>
+                            <span className="text-xs text-gray-500">
+                              {table.capacity} {table.capacity === 1 ? 'lugar' : 'lugares'}
+                            </span>
+                          </div>
+                        </Link>
+                      ))
+                    ) : (
+                      <div className="text-center py-4">
+                        <p className="text-gray-500 text-sm">Todas as mesas estão ocupadas</p>
+                        <p className="text-xs text-gray-400 mt-1">Aguarde uma mesa ficar disponível</p>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -113,7 +149,7 @@ export const HomePage: React.FC = () => {
 
         {/* Footer */}
         <div className="text-center mt-12 text-gray-500">
-          <p>Sistema desenvolvido para demonstração - Dados são simulados</p>
+          <p>Sistema de Pedidos QR - Desenvolvido para restaurantes</p>
         </div>
       </div>
     </div>
