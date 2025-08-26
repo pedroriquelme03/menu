@@ -25,6 +25,7 @@ type RestaurantAction =
   | { type: 'CLOSE_TABLE'; payload: string }
   | { type: 'ADD_SEAT'; payload: Seat }
   | { type: 'ADD_TABLE'; payload: Table }
+  | { type: 'OCCUPY_TABLE'; payload: { tableId: string; sessionId: string } }
   | { type: 'ADD_MENU_ITEM'; payload: MenuItem }
   | { type: 'UPDATE_MENU_ITEM'; payload: MenuItem }
   | { type: 'DELETE_MENU_ITEM'; payload: string }

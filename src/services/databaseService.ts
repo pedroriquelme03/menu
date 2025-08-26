@@ -74,6 +74,40 @@ export class DatabaseService {
     return true;
   }
 
+  static async occupyTable(id: string, sessionId: string): Promise<boolean> {
+    const { error } = await supabase
+      .from('tables')
+      .update({
+        is_occupied: true,
+        session_id: sessionId
+      })
+      .eq('id', id);
+
+    if (error) {
+      console.error('Erro ao ocupar mesa:', error);
+      return false;
+    }
+
+    return true;
+  }
+
+  static async freeTable(id: string): Promise<boolean> {
+    const { error } = await supabase
+      .from('tables')
+      .update({
+        is_occupied: false,
+        session_id: null
+      })
+      .eq('id', id);
+
+    if (error) {
+      console.error('Erro ao liberar mesa:', error);
+      return false;
+    }
+
+    return true;
+  }
+
   // ===== SEATS =====
   static async getSeats(): Promise<Seat[]> {
     const { data, error } = await supabase

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useRestaurant } from '../../contexts/RestaurantContext';
+import { useTableSession } from '../../hooks/useTableSession';
 import { JoinTable } from './JoinTable';
 import { MenuView } from './MenuView';
 import { CartView } from './CartView';
@@ -13,13 +14,20 @@ type ClientTab = 'menu' | 'cart' | 'orders' | 'bill';
 export const ClientApp: React.FC = () => {
   const { tableToken } = useParams<{ tableToken: string }>();
   const { state } = useRestaurant();
+  const { currentTable, currentSeat, isInTable } = useTableSession();
   const [activeTab, setActiveTab] = useState<ClientTab>('menu');
-  const [currentTable, setCurrentTable] = useState(null);
 
   useEffect(() => {
     if (tableToken && state.tables.length > 0) {
       const table = state.tables.find(t => t.token === tableToken);
-      setCurrentTable(table || null);
+      if (table) {
+        // Verificar se há uma sessão ativa para esta mesa
+        const sessionTableId = localStorage.getItem('currentTableId');
+        if (sessionTableId === table.id) {
+          // Usar a mesa da sessão
+          return;
+        }
+      }
     }
   }, [tableToken, state.tables]);
 
@@ -34,7 +42,7 @@ export const ClientApp: React.FC = () => {
     );
   }
 
-  if (!state.currentSeat) {
+  if (!isInTable || !currentSeat) {
     return <JoinTable table={currentTable} />;
   }
 
@@ -49,7 +57,7 @@ export const ClientApp: React.FC = () => {
             <div>
               <h1 className="text-lg font-bold text-gray-800">Mesa {currentTable.number}</h1>
               <p className="text-sm text-gray-600">
-                {state.currentSeat.guestName || `Convidado ${state.currentSeat.seatNumber || 1}`}
+                {currentSeat.guestName || `Convidado ${currentSeat.seatNumber || 1}`}
               </p>
             </div>
             <div className="text-right">

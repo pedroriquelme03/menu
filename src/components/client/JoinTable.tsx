@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useRestaurant } from '../../contexts/RestaurantContext';
+import { DatabaseService } from '../../services/databaseService';
 import { Table, Seat } from '../../types';
 import { Users, User } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
@@ -18,22 +19,51 @@ export const JoinTable: React.FC<JoinTableProps> = ({ table }) => {
   const handleJoinTable = async () => {
     setIsJoining(true);
     
-    const deviceId = localStorage.getItem('deviceId') || uuidv4();
-    localStorage.setItem('deviceId', deviceId);
+    try {
+      const deviceId = localStorage.getItem('deviceId') || uuidv4();
+      localStorage.setItem('deviceId', deviceId);
 
-    const newSeat: Seat = {
-      id: uuidv4(),
-      tableId: table.id,
-      seatNumber: tableSeats.length + 1,
-      guestName: guestName.trim() || undefined,
-      deviceId,
-      joinedAt: new Date()
-    };
+      // Gerar ID de sessão único para a mesa
+      const sessionId = `session-${table.id}-${Date.now()}`;
+      
+      // Salvar informações da sessão no localStorage
+      localStorage.setItem('currentTableId', table.id);
+      localStorage.setItem('currentSessionId', sessionId);
+      localStorage.setItem('currentSeatId', uuidv4());
+      localStorage.setItem('guestName', guestName.trim() || '');
 
-    dispatch({ type: 'ADD_SEAT', payload: newSeat });
-    dispatch({ type: 'SET_CURRENT_SEAT', payload: newSeat });
-    
-    setIsJoining(false);
+      const newSeat: Seat = {
+        id: localStorage.getItem('currentSeatId')!,
+        tableId: table.id,
+        seatNumber: tableSeats.length + 1,
+        guestName: guestName.trim() || undefined,
+        deviceId,
+        joinedAt: new Date()
+      };
+
+      // Ocupar a mesa no banco de dados
+      const success = await DatabaseService.occupyTable(table.id, sessionId);
+      if (!success) {
+        throw new Error('Erro ao ocupar mesa');
+      }
+
+      // Ocupar a mesa no estado local
+      dispatch({ type: 'OCCUPY_TABLE', payload: { tableId: table.id, sessionId } });
+      
+      // Adicionar assento
+      dispatch({ type: 'ADD_SEAT', payload: newSeat });
+      dispatch({ type: 'SET_CURRENT_SEAT', payload: newSeat });
+      
+    } catch (error) {
+      console.error('Erro ao entrar na mesa:', error);
+      // Limpar localStorage em caso de erro
+      localStorage.removeItem('currentTableId');
+      localStorage.removeItem('currentSessionId');
+      localStorage.removeItem('currentSeatId');
+      localStorage.removeItem('guestName');
+    } finally {
+      setIsJoining(false);
+    }
   };
 
   return (
