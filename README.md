@@ -33,6 +33,7 @@ Sistema completo de gerenciamento de pedidos para restaurantes via QR Code, dese
 - **Estado Global**: Context API + useReducer
 - **Ícones**: Lucide React
 - **QR Codes**: qrcode + jszip
+- **Deploy**: Vercel
 
 ## 📱 Como Funciona
 
@@ -68,6 +69,24 @@ npm run build
 # Preview da build
 npm run preview
 ```
+
+## 🚀 Deploy no Vercel
+
+### Configuração Automática
+1. **Conecte** seu repositório GitHub ao Vercel
+2. **Configure** as variáveis de ambiente do Supabase
+3. **Deploy automático** será feito a cada push
+
+### Variáveis de Ambiente Necessárias
+```env
+VITE_SUPABASE_URL=https://seu-projeto.supabase.co
+VITE_SUPABASE_ANON_KEY=sua-chave-anonima
+```
+
+### Configuração de Roteamento
+O projeto já inclui:
+- ✅ `vercel.json` - Configuração de rewrites
+- ✅ `public/_redirects` - Redirecionamentos para SPA
 
 ## 📁 Estrutura do Projeto
 
