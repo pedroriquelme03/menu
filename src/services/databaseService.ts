@@ -193,6 +193,41 @@ export class DatabaseService {
     };
   }
 
+  static async updateMenuItem(id: string, updates: Partial<MenuItem>): Promise<boolean> {
+    const { error } = await supabase
+      .from('menu_items')
+      .update({
+        name: updates.name,
+        description: updates.description,
+        price: updates.price,
+        category: updates.category,
+        image_url: updates.imageUrl,
+        is_available: updates.isAvailable
+      })
+      .eq('id', id);
+
+    if (error) {
+      console.error('Erro ao atualizar item do menu:', error);
+      return false;
+    }
+
+    return true;
+  }
+
+  static async deleteMenuItem(id: string): Promise<boolean> {
+    const { error } = await supabase
+      .from('menu_items')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error('Erro ao deletar item do menu:', error);
+      return false;
+    }
+
+    return true;
+  }
+
   // ===== ORDERS =====
   static async getOrders(): Promise<Order[]> {
     const { data, error } = await supabase

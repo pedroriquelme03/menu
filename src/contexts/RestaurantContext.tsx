@@ -25,6 +25,9 @@ type RestaurantAction =
   | { type: 'CLOSE_TABLE'; payload: string }
   | { type: 'ADD_SEAT'; payload: Seat }
   | { type: 'ADD_TABLE'; payload: Table }
+  | { type: 'ADD_MENU_ITEM'; payload: MenuItem }
+  | { type: 'UPDATE_MENU_ITEM'; payload: MenuItem }
+  | { type: 'DELETE_MENU_ITEM'; payload: string }
   | { type: 'LOAD_DATA'; payload: RestaurantState };
 
 const initialState: RestaurantState = {
@@ -95,6 +98,23 @@ const restaurantReducer = (state: RestaurantState, action: RestaurantAction): Re
     
     case 'ADD_TABLE':
       return { ...state, tables: [...state.tables, action.payload] };
+    
+    case 'ADD_MENU_ITEM':
+      return { ...state, menu: [...state.menu, action.payload] };
+    
+    case 'UPDATE_MENU_ITEM':
+      return {
+        ...state,
+        menu: state.menu.map(item =>
+          item.id === action.payload.id ? action.payload : item
+        )
+      };
+    
+    case 'DELETE_MENU_ITEM':
+      return {
+        ...state,
+        menu: state.menu.filter(item => item.id !== action.payload)
+      };
     
     case 'CLOSE_TABLE':
       return {
