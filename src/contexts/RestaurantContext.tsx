@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, useState } from 'react';
 import { Table, Seat, MenuItem, Order, OrderItem, Payment, Staff } from '../types';
-import { seedData } from '../data/seedData';
+import { DatabaseService } from '../services/databaseService';
 
 interface RestaurantState {
   tables: Table[];
@@ -73,11 +73,11 @@ const restaurantReducer = (state: RestaurantState, action: RestaurantAction): Re
           order.id === action.payload.orderId
             ? {
                 ...order,
-                status: action.payload.itemId ? order.status : action.payload.status,
+                status: action.payload.itemId ? order.status : (action.payload.status as any),
                 items: action.payload.itemId
                   ? order.items.map(item =>
                       item.id === action.payload.itemId
-                        ? { ...item, status: action.payload.status }
+                        ? { ...item, status: action.payload.status as any }
                         : item
                     )
                   : order.items
@@ -115,19 +115,67 @@ const RestaurantContext = createContext<{
 
 export const RestaurantProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, dispatch] = useReducer(restaurantReducer, initialState);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const savedData = localStorage.getItem('restaurantData');
-    if (savedData) {
-      dispatch({ type: 'LOAD_DATA', payload: JSON.parse(savedData) });
-    } else {
-      dispatch({ type: 'LOAD_DATA', payload: seedData });
-    }
+    const loadData = async () => {
+      try {
+        setIsLoading(true);
+        
+        // Inicializar banco de dados se necessário
+        await DatabaseService.initializeDatabase();
+        
+        // Carregar dados do banco
+        const [tables, seats, menu, orders, payments] = await Promise.all([
+          DatabaseService.getTables(),
+          DatabaseService.getSeats(),
+          DatabaseService.getMenuItems(),
+          DatabaseService.getOrders(),
+          DatabaseService.getPayments()
+        ]);
+
+        dispatch({
+          type: 'LOAD_DATA',
+          payload: {
+            tables,
+            seats,
+            menu,
+            orders,
+            payments,
+            staff: [], // Por enquanto vazio
+            cart: []
+          }
+        });
+      } catch (error) {
+        console.error('Erro ao carregar dados:', error);
+        // Fallback para dados locais em caso de erro
+        dispatch({
+          type: 'LOAD_DATA',
+          payload: {
+            tables: [],
+            seats: [],
+            menu: [],
+            orders: [],
+            payments: [],
+            staff: [],
+            cart: []
+          }
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadData();
   }, []);
 
+  // Sincronizar dados com o banco quando houver mudanças
   useEffect(() => {
-    localStorage.setItem('restaurantData', JSON.stringify(state));
-  }, [state]);
+    if (!isLoading && state.tables.length > 0) {
+      // Aqui você pode implementar sincronização em tempo real se necessário
+      // Por enquanto, os dados são carregados apenas na inicialização
+    }
+  }, [state, isLoading]);
 
   return (
     <RestaurantContext.Provider value={{ state, dispatch }}>
