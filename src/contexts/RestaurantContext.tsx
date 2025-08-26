@@ -100,6 +100,16 @@ const restaurantReducer = (state: RestaurantState, action: RestaurantAction): Re
     case 'ADD_TABLE':
       return { ...state, tables: [...state.tables, action.payload] };
     
+    case 'OCCUPY_TABLE':
+      return {
+        ...state,
+        tables: state.tables.map(table =>
+          table.id === action.payload.tableId
+            ? { ...table, isOccupied: true, sessionId: action.payload.sessionId }
+            : table
+        )
+      };
+    
     case 'ADD_MENU_ITEM':
       return { ...state, menu: [...state.menu, action.payload] };
     

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useRestaurant } from '../../contexts/RestaurantContext';
 import { useTableSession } from '../../hooks/useTableSession';
+import { Table } from '../../types';
 import { JoinTable } from './JoinTable';
 import { MenuView } from './MenuView';
 import { CartView } from './CartView';
@@ -16,22 +17,17 @@ export const ClientApp: React.FC = () => {
   const { state } = useRestaurant();
   const { currentTable, currentSeat, isInTable } = useTableSession();
   const [activeTab, setActiveTab] = useState<ClientTab>('menu');
+  const [tableFromToken, setTableFromToken] = useState<Table | null>(null);
 
   useEffect(() => {
     if (tableToken && state.tables.length > 0) {
       const table = state.tables.find(t => t.token === tableToken);
-      if (table) {
-        // Verificar se há uma sessão ativa para esta mesa
-        const sessionTableId = localStorage.getItem('currentTableId');
-        if (sessionTableId === table.id) {
-          // Usar a mesa da sessão
-          return;
-        }
-      }
+      setTableFromToken(table || null);
     }
   }, [tableToken, state.tables]);
 
-  if (!currentTable) {
+  // Se não há mesa do token da URL, mostrar erro
+  if (!tableFromToken) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <div className="text-center">
@@ -42,46 +38,49 @@ export const ClientApp: React.FC = () => {
     );
   }
 
-  if (!isInTable || !currentSeat) {
-    return <JoinTable table={currentTable} />;
-  }
+  // Se há uma sessão ativa para esta mesa, usar ela
+  if (isInTable && currentTable && currentSeat && currentTable.id === tableFromToken.id) {
+    // Usar a mesa da sessão ativa
+    const cartItemsCount = state.cart.reduce((sum, item) => sum + item.quantity, 0);
 
-  const cartItemsCount = state.cart.reduce((sum, item) => sum + item.quantity, 0);
-
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
-        <div className="px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-lg font-bold text-gray-800">Mesa {currentTable.number}</h1>
-              <p className="text-sm text-gray-600">
-                {currentSeat.guestName || `Convidado ${currentSeat.seatNumber || 1}`}
-              </p>
-            </div>
-            <div className="text-right">
-              <div className="text-sm text-gray-500">Online</div>
-              <div className="w-2 h-2 bg-green-500 rounded-full ml-auto"></div>
+    return (
+      <div className="min-h-screen bg-gray-50">
+        {/* Header */}
+        <div className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
+          <div className="px-4 py-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-lg font-bold text-gray-800">Mesa {currentTable.number}</h1>
+                <p className="text-sm text-gray-600">
+                  {currentSeat.guestName || `Convidado ${currentSeat.seatNumber || 1}`}
+                </p>
+              </div>
+              <div className="text-right">
+                <div className="text-sm text-gray-500">Online</div>
+                <div className="w-2 h-2 bg-green-500 rounded-full ml-auto"></div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Content */}
-      <div className="pb-20">
-        {activeTab === 'menu' && <MenuView />}
-        {activeTab === 'cart' && <CartView />}
-        {activeTab === 'orders' && <OrdersView />}
-        {activeTab === 'bill' && <BillView />}
-      </div>
+        {/* Content */}
+        <div className="pb-20">
+          {activeTab === 'menu' && <MenuView />}
+          {activeTab === 'cart' && <CartView />}
+          {activeTab === 'orders' && <OrdersView />}
+          {activeTab === 'bill' && <BillView />}
+        </div>
 
-      {/* Bottom Navigation */}
-      <TabNavigation
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        cartItemsCount={cartItemsCount}
-      />
-    </div>
-  );
+        {/* Bottom Navigation */}
+        <TabNavigation
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          cartItemsCount={cartItemsCount}
+        />
+      </div>
+    );
+  } else {
+    // Mostrar tela de entrada na mesa
+    return <JoinTable table={tableFromToken} />;
+  }
 };
