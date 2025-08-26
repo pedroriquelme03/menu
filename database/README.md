@@ -19,11 +19,17 @@ Este diretório contém os scripts e configurações necessários para configura
 
 ### 2. Corrigir Políticas RLS (IMPORTANTE!)
 
-Após executar o schema principal, execute também o arquivo `fix_rls_policies.sql` para permitir a criação de mesas:
+Após executar o schema principal, execute também o arquivo `fix_rls_policies.sql` para permitir a criação de mesas e gerenciamento do cardápio:
 
 1. No **SQL Editor**, copie e cole o conteúdo do arquivo `fix_rls_policies.sql`
 2. Clique em **Run** para executar
-3. Verifique se a política foi criada corretamente
+3. Verifique se as políticas foram criadas corretamente
+
+**Políticas que serão criadas:**
+- ✅ Inserção de mesas (`tables`)
+- ✅ Inserção de itens do menu (`menu_items`)
+- ✅ Atualização de itens do menu (`menu_items`)
+- ✅ Exclusão de itens do menu (`menu_items`)
 
 ### 3. Verificar as Tabelas
 
