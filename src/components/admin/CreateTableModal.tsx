@@ -50,10 +50,11 @@ export const CreateTableModal: React.FC<CreateTableModalProps> = ({
         onTableCreated();
         onClose();
       } else {
-        setError('Erro ao criar mesa. Tente novamente.');
+        setError('Erro ao criar mesa. Verifique o console para mais detalhes.');
       }
     } catch (err) {
-      setError('Erro ao criar mesa. Verifique se o número já existe.');
+      console.error('Erro detalhado ao criar mesa:', err);
+      setError(`Erro ao criar mesa: ${err instanceof Error ? err.message : 'Erro desconhecido'}`);
     } finally {
       setIsLoading(false);
     }

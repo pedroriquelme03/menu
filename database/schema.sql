@@ -93,6 +93,9 @@ ALTER TABLE payments ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow public read access to tables" ON tables
   FOR SELECT USING (true);
 
+CREATE POLICY "Allow public insert to tables" ON tables
+  FOR INSERT WITH CHECK (true);
+
 CREATE POLICY "Allow public read access to menu items" ON menu_items
   FOR SELECT USING (true);
 

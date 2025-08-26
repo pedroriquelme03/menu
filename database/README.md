@@ -17,7 +17,15 @@ Este diretório contém os scripts e configurações necessários para configura
 3. Copie e cole o conteúdo do arquivo `schema.sql`
 4. Clique em **Run** para executar
 
-### 2. Verificar as Tabelas
+### 2. Corrigir Políticas RLS (IMPORTANTE!)
+
+Após executar o schema principal, execute também o arquivo `fix_rls_policies.sql` para permitir a criação de mesas:
+
+1. No **SQL Editor**, copie e cole o conteúdo do arquivo `fix_rls_policies.sql`
+2. Clique em **Run** para executar
+3. Verifique se a política foi criada corretamente
+
+### 3. Verificar as Tabelas
 
 Após executar o schema, você deve ver as seguintes tabelas:
 
@@ -27,7 +35,7 @@ Após executar o schema, você deve ver as seguintes tabelas:
 - `orders` - Pedidos dos clientes
 - `payments` - Pagamentos
 
-### 3. Configurar Variáveis de Ambiente
+### 4. Configurar Variáveis de Ambiente
 
 No Vercel, certifique-se de que as seguintes variáveis estão configuradas:
 
