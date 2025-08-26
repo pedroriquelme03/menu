@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Plus } from 'lucide-react';
 import { DatabaseService } from '../../services/databaseService';
+import { useRestaurant } from '../../contexts/RestaurantContext';
 
 interface CreateTableModalProps {
   isOpen: boolean;
@@ -13,6 +14,7 @@ export const CreateTableModal: React.FC<CreateTableModalProps> = ({
   onClose,
   onTableCreated
 }) => {
+  const { dispatch } = useRestaurant();
   const [tableNumber, setTableNumber] = useState('');
   const [capacity, setCapacity] = useState(4);
   const [isLoading, setIsLoading] = useState(false);
@@ -45,6 +47,9 @@ export const CreateTableModal: React.FC<CreateTableModalProps> = ({
       });
 
       if (newTable) {
+        // Adicionar a nova mesa ao estado global
+        dispatch({ type: 'ADD_TABLE', payload: newTable });
+        
         setTableNumber('');
         setCapacity(4);
         onTableCreated();

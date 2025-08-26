@@ -42,8 +42,8 @@ export const TablesView: React.FC = () => {
   };
 
   const handleTableCreated = () => {
-    // Recarregar os dados das mesas
-    window.location.reload();
+    // Recarregar os dados das mesas sem recarregar a página
+    // O contexto será atualizado automaticamente
   };
 
   return (

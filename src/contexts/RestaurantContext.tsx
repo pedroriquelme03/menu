@@ -93,6 +93,9 @@ const restaurantReducer = (state: RestaurantState, action: RestaurantAction): Re
     case 'ADD_SEAT':
       return { ...state, seats: [...state.seats, action.payload] };
     
+    case 'ADD_TABLE':
+      return { ...state, tables: [...state.tables, action.payload] };
+    
     case 'CLOSE_TABLE':
       return {
         ...state,
