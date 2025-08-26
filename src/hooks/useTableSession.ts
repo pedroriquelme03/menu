@@ -37,6 +37,10 @@ export const useTableSession = () => {
           if (!table.isOccupied) {
             dispatch({ type: 'OCCUPY_TABLE', payload: { tableId: table.id, sessionId } });
           }
+        } else {
+          // Assento não encontrado, limpar sessão
+          clearTableSession();
+          setIsLoading(false);
         }
       } else if (tableId && sessionId && state.tables.length > 0) {
         // Se temos tableId e sessionId mas a mesa não foi encontrada ainda,
@@ -48,7 +52,7 @@ export const useTableSession = () => {
         // Se temos tableId e sessionId mas os dados ainda não foram carregados,
         // vamos aguardar um pouco mais
         console.log('Aguardando carregamento dos dados da mesa...');
-        setIsLoading(false);
+        // Não definir isLoading como false aqui, manter loading até dados carregarem
       }
     } else {
       // Não há sessão ativa

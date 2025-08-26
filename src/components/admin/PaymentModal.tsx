@@ -3,6 +3,7 @@ import { useRestaurant } from '../../contexts/RestaurantContext';
 import { Table, Payment } from '../../types';
 import { X, CreditCard, Banknote, Smartphone, Users } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
+import { DatabaseService } from '../../services/databaseService';
 
 interface PaymentModalProps {
   table: Table;
@@ -63,11 +64,26 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ table, onClose }) =>
       });
     }
 
-    // Close table
-    dispatch({ type: 'CLOSE_TABLE', payload: table.id });
-    
-    setIsProcessing(false);
-    onClose();
+    try {
+      // Fechar mesa no banco de dados
+      const success = await DatabaseService.freeTable(table.id);
+      if (!success) {
+        console.error('Erro ao fechar mesa no banco de dados');
+        // Continuar mesmo com erro para não bloquear o usuário
+      }
+      
+      // Fechar mesa no estado local
+      dispatch({ type: 'CLOSE_TABLE', payload: table.id });
+      
+      setIsProcessing(false);
+      onClose();
+    } catch (error) {
+      console.error('Erro ao processar fechamento da mesa:', error);
+      setIsProcessing(false);
+      // Fechar mesa no estado local mesmo com erro
+      dispatch({ type: 'CLOSE_TABLE', payload: table.id });
+      onClose();
+    }
   };
 
   const paymentMethods = [
