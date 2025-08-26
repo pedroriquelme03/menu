@@ -15,7 +15,7 @@ type ClientTab = 'menu' | 'cart' | 'orders' | 'bill';
 export const ClientApp: React.FC = () => {
   const { tableToken } = useParams<{ tableToken: string }>();
   const { state } = useRestaurant();
-  const { currentTable, currentSeat, isInTable } = useTableSession();
+  const { currentTable, currentSeat, isInTable, isLoading } = useTableSession();
   const [activeTab, setActiveTab] = useState<ClientTab>('menu');
   const [tableFromToken, setTableFromToken] = useState<Table | null>(null);
 
@@ -33,6 +33,19 @@ export const ClientApp: React.FC = () => {
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-800 mb-4">Mesa não encontrada</h2>
           <p className="text-gray-600">Token da mesa inválido ou expirado</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Se ainda está carregando a sessão, mostrar loading
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto mb-4"></div>
+          <h2 className="text-xl font-semibold text-gray-800">Carregando...</h2>
+          <p className="text-gray-600">Restaurando sua sessão</p>
         </div>
       </div>
     );

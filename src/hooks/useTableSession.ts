@@ -7,6 +7,7 @@ export const useTableSession = () => {
   const [currentTable, setCurrentTable] = useState<Table | null>(null);
   const [currentSeat, setCurrentSeat] = useState<Seat | null>(null);
   const [isInTable, setIsInTable] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     // Verificar se há uma sessão ativa no localStorage
@@ -18,21 +19,40 @@ export const useTableSession = () => {
     if (tableId && sessionId && seatId) {
       // Buscar a mesa atual
       const table = state.tables.find(t => t.id === tableId);
-      if (table && table.isOccupied && table.sessionId === sessionId) {
+      
+      // Se a mesa existe e tem a sessão correta, restaurar
+      if (table && table.sessionId === sessionId) {
         // Buscar o assento atual
         const seat = state.seats.find(s => s.id === seatId);
         if (seat) {
           setCurrentTable(table);
           setCurrentSeat(seat);
           setIsInTable(true);
+          setIsLoading(false);
           
           // Restaurar o estado da sessão
           dispatch({ type: 'SET_CURRENT_SEAT', payload: seat });
+          
+          // Garantir que a mesa esteja marcada como ocupada no estado
+          if (!table.isOccupied) {
+            dispatch({ type: 'OCCUPY_TABLE', payload: { tableId: table.id, sessionId } });
+          }
         }
-      } else {
-        // Sessão inválida, limpar localStorage
+      } else if (tableId && sessionId && state.tables.length > 0) {
+        // Se temos tableId e sessionId mas a mesa não foi encontrada ainda,
+        // e os dados já foram carregados, então a sessão é inválida
+        console.log('Sessão inválida - mesa não encontrada');
         clearTableSession();
+        setIsLoading(false);
+      } else if (tableId && sessionId) {
+        // Se temos tableId e sessionId mas os dados ainda não foram carregados,
+        // vamos aguardar um pouco mais
+        console.log('Aguardando carregamento dos dados da mesa...');
+        setIsLoading(false);
       }
+    } else {
+      // Não há sessão ativa
+      setIsLoading(false);
     }
   }, [state.tables, state.seats, dispatch]);
 
@@ -66,6 +86,7 @@ export const useTableSession = () => {
     currentTable,
     currentSeat,
     isInTable,
+    isLoading,
     leaveTable,
     clearTableSession
   };
