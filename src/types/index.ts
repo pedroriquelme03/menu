@@ -60,14 +60,16 @@ export interface SelectedModifier {
 
 export interface Order {
   id: string;
-  tableId: string;
-  seatId: string;
+  tableId?: string; // Opcional para pedidos WhatsApp
+  seatId?: string; // Opcional para pedidos WhatsApp
+  whatsappOrderId?: string; // ID do pedido WhatsApp
   items: OrderItem[];
   subtotal: number;
   status: 'pending' | 'confirmed' | 'preparing' | 'ready' | 'delivered' | 'cancelled';
   createdAt: Date;
   updatedAt: Date;
   notes?: string;
+  orderType: 'table' | 'whatsapp'; // Tipo do pedido
 }
 
 export interface Payment {
@@ -86,4 +88,63 @@ export interface Staff {
   email: string;
   role: 'admin' | 'cashier' | 'kitchen' | 'waiter';
   isActive: boolean;
+}
+
+// ===== TIPOS PARA INTEGRAÇÃO WHATSAPP =====
+
+export interface WhatsAppOrder {
+  id: string;
+  customerPhone: string;
+  customerName?: string;
+  customerAddress?: string;
+  items: WhatsAppOrderItem[];
+  subtotal: number;
+  deliveryFee?: number;
+  total: number;
+  status: 'pending' | 'confirmed' | 'preparing' | 'ready' | 'delivered' | 'cancelled';
+  paymentMethod?: 'cash' | 'card' | 'pix';
+  paymentStatus?: 'pending' | 'completed' | 'failed';
+  notes?: string;
+  createdAt: Date;
+  updatedAt: Date;
+  estimatedDeliveryTime?: Date;
+}
+
+export interface WhatsAppOrderItem {
+  id: string;
+  menuItemId: string;
+  menuItemSnapshot: MenuItem;
+  quantity: number;
+  notes?: string;
+  customizations?: string[];
+}
+
+export interface WhatsAppWebhookPayload {
+  orderId: string;
+  customerPhone: string;
+  customerName?: string;
+  customerAddress?: string;
+  items: {
+    menuItemId: string;
+    quantity: number;
+    notes?: string;
+    customizations?: string[];
+  }[];
+  paymentMethod?: 'cash' | 'card' | 'pix';
+  notes?: string;
+  timestamp: string;
+}
+
+export interface SystemConfig {
+  orderMode: 'table' | 'whatsapp' | 'both';
+  whatsappIntegration: {
+    enabled: boolean;
+    webhookUrl?: string;
+    autoConfirmOrders: boolean;
+    defaultDeliveryFee: number;
+  };
+  tableIntegration: {
+    enabled: boolean;
+    qrCodeEnabled: boolean;
+  };
 }

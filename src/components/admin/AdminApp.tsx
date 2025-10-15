@@ -3,9 +3,11 @@ import { TablesView } from './TablesView';
 import { MenuManagement } from './MenuManagement';
 import { ReportsView } from './ReportsView';
 import { Settings } from './Settings';
-import { LayoutGrid, Menu, BarChart3, Settings as SettingsIcon, Asterisk as CashRegister } from 'lucide-react';
+import { WhatsAppOrdersView } from './WhatsAppOrdersView';
+import { SystemConfigView } from './SystemConfigView';
+import { LayoutGrid, Menu, BarChart3, Settings as SettingsIcon, Asterisk as CashRegister, MessageCircle, Cog } from 'lucide-react';
 
-type AdminTab = 'tables' | 'menu' | 'reports' | 'settings';
+type AdminTab = 'tables' | 'menu' | 'whatsapp' | 'reports' | 'settings' | 'system';
 
 export const AdminApp: React.FC = () => {
   const [activeTab, setActiveTab] = useState<AdminTab>('tables');
@@ -13,8 +15,10 @@ export const AdminApp: React.FC = () => {
   const tabs = [
     { id: 'tables' as AdminTab, label: 'Mesas', icon: LayoutGrid },
     { id: 'menu' as AdminTab, label: 'Cardápio', icon: Menu },
+    { id: 'whatsapp' as AdminTab, label: 'WhatsApp', icon: MessageCircle },
     { id: 'reports' as AdminTab, label: 'Relatórios', icon: BarChart3 },
-    { id: 'settings' as AdminTab, label: 'Configurações', icon: SettingsIcon }
+    { id: 'settings' as AdminTab, label: 'Configurações', icon: SettingsIcon },
+    { id: 'system' as AdminTab, label: 'Sistema', icon: Cog }
   ];
 
   return (
@@ -59,8 +63,10 @@ export const AdminApp: React.FC = () => {
       <div className="p-6">
         {activeTab === 'tables' && <TablesView />}
         {activeTab === 'menu' && <MenuManagement />}
+        {activeTab === 'whatsapp' && <WhatsAppOrdersView />}
         {activeTab === 'reports' && <ReportsView />}
         {activeTab === 'settings' && <Settings />}
+        {activeTab === 'system' && <SystemConfigView />}
       </div>
     </div>
   );

@@ -58,6 +58,25 @@ CREATE TABLE IF NOT EXISTS payments (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Tabela de pedidos WhatsApp
+CREATE TABLE IF NOT EXISTS whatsapp_orders (
+  id TEXT PRIMARY KEY, -- ID do pedido vindo do n8n
+  customer_phone TEXT NOT NULL,
+  customer_name TEXT,
+  customer_address TEXT,
+  items JSONB NOT NULL DEFAULT '[]',
+  subtotal DECIMAL(10,2) NOT NULL DEFAULT 0,
+  delivery_fee DECIMAL(10,2) DEFAULT 0,
+  total DECIMAL(10,2) NOT NULL DEFAULT 0,
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'confirmed', 'preparing', 'ready', 'delivered', 'cancelled')),
+  payment_method TEXT CHECK (payment_method IN ('cash', 'card', 'pix')),
+  payment_status TEXT DEFAULT 'pending' CHECK (payment_status IN ('pending', 'completed', 'failed')),
+  notes TEXT,
+  estimated_delivery_time TIMESTAMP WITH TIME ZONE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- Índices para melhor performance
 CREATE INDEX IF NOT EXISTS idx_tables_number ON tables(number);
 CREATE INDEX IF NOT EXISTS idx_tables_token ON tables(token);
@@ -66,6 +85,9 @@ CREATE INDEX IF NOT EXISTS idx_menu_items_category ON menu_items(category);
 CREATE INDEX IF NOT EXISTS idx_orders_table_id ON orders(table_id);
 CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
 CREATE INDEX IF NOT EXISTS idx_payments_table_id ON payments(table_id);
+CREATE INDEX IF NOT EXISTS idx_whatsapp_orders_status ON whatsapp_orders(status);
+CREATE INDEX IF NOT EXISTS idx_whatsapp_orders_customer_phone ON whatsapp_orders(customer_phone);
+CREATE INDEX IF NOT EXISTS idx_whatsapp_orders_created_at ON whatsapp_orders(created_at);
 
 -- Função para atualizar o timestamp de updated_at
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -82,12 +104,18 @@ CREATE TRIGGER update_orders_updated_at
   FOR EACH ROW 
   EXECUTE FUNCTION update_updated_at_column();
 
+CREATE TRIGGER update_whatsapp_orders_updated_at 
+  BEFORE UPDATE ON whatsapp_orders 
+  FOR EACH ROW 
+  EXECUTE FUNCTION update_updated_at_column();
+
 -- Políticas de segurança RLS (Row Level Security)
 ALTER TABLE tables ENABLE ROW LEVEL SECURITY;
 ALTER TABLE seats ENABLE ROW LEVEL SECURITY;
 ALTER TABLE menu_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE payments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE whatsapp_orders ENABLE ROW LEVEL SECURITY;
 
 -- Política para permitir leitura pública de mesas e menu
 CREATE POLICY "Allow public read access to tables" ON tables
@@ -117,4 +145,14 @@ CREATE POLICY "Allow public update orders" ON orders
 
 -- Política para permitir atualização de mesas
 CREATE POLICY "Allow public update tables" ON tables
+  FOR UPDATE USING (true);
+
+-- Políticas para pedidos WhatsApp
+CREATE POLICY "Allow public read access to whatsapp orders" ON whatsapp_orders
+  FOR SELECT USING (true);
+
+CREATE POLICY "Allow public insert to whatsapp orders" ON whatsapp_orders
+  FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Allow public update whatsapp orders" ON whatsapp_orders
   FOR UPDATE USING (true);
