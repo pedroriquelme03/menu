@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useRestaurant } from '../../contexts/RestaurantContext';
 import { WhatsAppService } from '../../services/whatsappService';
+import { DatabaseService } from '../../services/databaseService';
 import { UnifiedOrderTicket } from './UnifiedOrderTicket';
 import { Order, WhatsAppOrder } from '../../types';
 import { ChefHat, Clock, CheckCircle, Package, MessageCircle, Users, RefreshCw } from 'lucide-react';
 
-type KDSFilter = 'all' | 'pending' | 'confirmed' | 'preparing' | 'ready';
+type KDSFilter = 'all' | 'pending' | 'confirmed' | 'preparing' | 'ready' | 'cancelled';
 type OrderSource = 'all' | 'table' | 'whatsapp';
 
 export const KDSApp: React.FC = () => {
@@ -17,9 +18,11 @@ export const KDSApp: React.FC = () => {
 
   const filters = [
     { id: 'all' as KDSFilter, label: 'Todos', icon: ChefHat },
+    { id: 'pending' as KDSFilter, label: 'Pendentes', icon: Clock },
     { id: 'confirmed' as KDSFilter, label: 'Confirmados', icon: CheckCircle },
     { id: 'preparing' as KDSFilter, label: 'Preparando', icon: Clock },
-    { id: 'ready' as KDSFilter, label: 'Prontos', icon: Package }
+    { id: 'ready' as KDSFilter, label: 'Prontos', icon: Package },
+    { id: 'cancelled' as KDSFilter, label: 'Recusados', icon: Package }
   ];
 
   const sourceFilters = [
@@ -62,9 +65,15 @@ export const KDSApp: React.FC = () => {
           );
         }
       } else if (tableOrder) {
-        // Atualizar pedido de mesa (usar o serviço existente)
-        // Aqui você pode implementar a atualização do pedido de mesa
-        console.log('Atualizando pedido de mesa:', orderId, status);
+        // Atualizar pedido de mesa usando o DatabaseService
+        const success = await DatabaseService.updateOrderStatus(orderId, status);
+        if (success) {
+          // Atualizar o estado local
+          dispatch({ 
+            type: 'UPDATE_ORDER_STATUS', 
+            payload: { orderId, status } 
+          });
+        }
       }
     } catch (error) {
       console.error('Erro ao atualizar status:', error);
@@ -80,7 +89,7 @@ export const KDSApp: React.FC = () => {
   const filteredOrders = allOrders.filter(order => {
     // Filtro por status
     const statusMatch = activeFilter === 'all' 
-      ? order.status !== 'delivered' && order.status !== 'cancelled'
+      ? order.status !== 'delivered'
       : order.status === activeFilter;
 
     // Filtro por fonte
@@ -92,9 +101,11 @@ export const KDSApp: React.FC = () => {
   }).sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
 
   const orderCounts = {
+    pending: allOrders.filter(o => o.status === 'pending').length,
     confirmed: allOrders.filter(o => o.status === 'confirmed').length,
     preparing: allOrders.filter(o => o.status === 'preparing').length,
-    ready: allOrders.filter(o => o.status === 'ready').length
+    ready: allOrders.filter(o => o.status === 'ready').length,
+    cancelled: allOrders.filter(o => o.status === 'cancelled').length
   };
 
   return (

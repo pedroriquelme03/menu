@@ -72,7 +72,9 @@ export const UnifiedOrderTicket: React.FC<UnifiedOrderTicketProps> = ({
     if (isWhatsAppOrder && whatsappOrder) {
       return `WhatsApp #${whatsappOrder.id.slice(-8)}`;
     } else if (tableOrder) {
-      return `Mesa ${tableOrder.tableId}`;
+      // Buscar informações da mesa e assento
+      const tableNumber = tableOrder.tableId; // Assumindo que tableId é o número da mesa
+      return `Mesa ${tableNumber}`;
     }
     return 'Pedido';
   };
@@ -146,14 +148,14 @@ export const UnifiedOrderTicket: React.FC<UnifiedOrderTicketProps> = ({
             <div key={index} className="flex items-center justify-between text-xs">
               <div className="flex-1">
                 <span className="font-medium text-gray-800">
-                  {item.quantity}x {item.menuItemSnapshot.name}
+                  {item.quantity}x {item.menuItemSnapshot?.name || 'Item'}
                 </span>
                 {item.notes && (
                   <div className="text-gray-500 text-xs">({item.notes})</div>
                 )}
               </div>
               <span className="text-gray-600">
-                {formatPrice(item.menuItemSnapshot.price * item.quantity)}
+                {formatPrice((item.menuItemSnapshot?.price || 0) * item.quantity)}
               </span>
             </div>
           ))}
@@ -176,24 +178,59 @@ export const UnifiedOrderTicket: React.FC<UnifiedOrderTicketProps> = ({
 
       {/* Actions */}
       <div className="flex gap-2">
-        {order.status !== 'delivered' && order.status !== 'cancelled' && (
+        {order.status === 'pending' && (
+          <>
+            <button
+              onClick={() => onStatusUpdate(order.id, 'confirmed')}
+              className="flex-1 px-3 py-2 bg-green-600 text-white rounded-lg text-xs font-medium transition-colors hover:bg-green-700"
+            >
+              Preparar
+            </button>
+            <button
+              onClick={() => onStatusUpdate(order.id, 'cancelled')}
+              className="flex-1 px-3 py-2 bg-red-600 text-white rounded-lg text-xs font-medium transition-colors hover:bg-red-700"
+            >
+              Recusar
+            </button>
+          </>
+        )}
+        
+        {order.status === 'confirmed' && (
           <button
-            onClick={() => onStatusUpdate(order.id, getNextStatus(order.status))}
-            className={`flex-1 px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
-              order.status === 'pending' ? 'bg-blue-600 text-white hover:bg-blue-700' :
-              order.status === 'confirmed' ? 'bg-orange-600 text-white hover:bg-orange-700' :
-              order.status === 'preparing' ? 'bg-green-600 text-white hover:bg-green-700' :
-              order.status === 'ready' ? 'bg-gray-600 text-white hover:bg-gray-700' :
-              'bg-gray-600 text-white hover:bg-gray-700'
-            }`}
+            onClick={() => onStatusUpdate(order.id, 'preparing')}
+            className="flex-1 px-3 py-2 bg-orange-600 text-white rounded-lg text-xs font-medium transition-colors hover:bg-orange-700"
           >
-            {getNextStatusLabel(order.status)}
+            Iniciar Preparo
+          </button>
+        )}
+        
+        {order.status === 'preparing' && (
+          <button
+            onClick={() => onStatusUpdate(order.id, 'ready')}
+            className="flex-1 px-3 py-2 bg-green-600 text-white rounded-lg text-xs font-medium transition-colors hover:bg-green-700"
+          >
+            Marcar Pronto
+          </button>
+        )}
+        
+        {order.status === 'ready' && (
+          <button
+            onClick={() => onStatusUpdate(order.id, 'delivered')}
+            className="flex-1 px-3 py-2 bg-gray-600 text-white rounded-lg text-xs font-medium transition-colors hover:bg-gray-700"
+          >
+            Marcar Entregue
           </button>
         )}
         
         {order.status === 'delivered' && (
           <div className="flex-1 px-3 py-2 bg-gray-100 text-gray-600 rounded-lg text-xs font-medium text-center">
             Pedido Finalizado
+          </div>
+        )}
+        
+        {order.status === 'cancelled' && (
+          <div className="flex-1 px-3 py-2 bg-red-100 text-red-600 rounded-lg text-xs font-medium text-center">
+            Pedido Recusado
           </div>
         )}
       </div>
