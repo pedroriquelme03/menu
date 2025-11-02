@@ -18,7 +18,7 @@
   ],
   "functions": {
     "api/webhook/whatsapp.ts": {
-      "runtime": "@vercel/node@3.0.7"
+      "runtime": "nodejs22.x"
     }
   },
   "env": {
