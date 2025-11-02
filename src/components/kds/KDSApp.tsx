@@ -14,6 +14,7 @@ export const KDSApp: React.FC = () => {
   const [activeFilter, setActiveFilter] = useState<KDSFilter>('all');
   const [activeSource, setActiveSource] = useState<OrderSource>('all');
   const [whatsappOrders, setWhatsappOrders] = useState<WhatsAppOrder[]>([]);
+  const [tableOrders, setTableOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const filters = [
@@ -32,16 +33,23 @@ export const KDSApp: React.FC = () => {
   ];
 
   useEffect(() => {
-    loadWhatsAppOrders();
+    loadOrders();
+    // Atualizar pedidos a cada 5 segundos
+    const interval = setInterval(loadOrders, 5000);
+    return () => clearInterval(interval);
   }, []);
 
-  const loadWhatsAppOrders = async () => {
+  const loadOrders = async () => {
     setIsLoading(true);
     try {
-      const orders = await WhatsAppService.getWhatsAppOrders();
-      setWhatsappOrders(orders);
+      const [whatsapp, table] = await Promise.all([
+        WhatsAppService.getWhatsAppOrders(),
+        DatabaseService.getOrders()
+      ]);
+      setWhatsappOrders(whatsapp);
+      setTableOrders(table);
     } catch (error) {
-      console.error('Erro ao carregar pedidos WhatsApp:', error);
+      console.error('Erro ao carregar pedidos:', error);
     } finally {
       setIsLoading(false);
     }
@@ -51,7 +59,7 @@ export const KDSApp: React.FC = () => {
     try {
       // Verificar se é um pedido WhatsApp ou de mesa
       const whatsappOrder = whatsappOrders.find(o => o.id === orderId);
-      const tableOrder = state.orders.find(o => o.id === orderId);
+      const tableOrder = tableOrders.find(o => o.id === orderId);
 
       if (whatsappOrder) {
         const success = await WhatsAppService.updateWhatsAppOrderStatus(orderId, status);
@@ -68,11 +76,14 @@ export const KDSApp: React.FC = () => {
         // Atualizar pedido de mesa usando o DatabaseService
         const success = await DatabaseService.updateOrderStatus(orderId, status);
         if (success) {
-          // Atualizar o estado local
-          dispatch({ 
-            type: 'UPDATE_ORDER_STATUS', 
-            payload: { orderId, status } 
-          });
+          // Atualizar o estado local e recarregar
+          setTableOrders(orders =>
+            orders.map(order =>
+              order.id === orderId
+                ? { ...order, status: status as any, updatedAt: new Date() }
+                : order
+            )
+          );
         }
       }
     } catch (error) {
@@ -82,7 +93,7 @@ export const KDSApp: React.FC = () => {
 
   // Combinar pedidos de mesa e WhatsApp
   const allOrders = [
-    ...state.orders.map(order => ({ ...order, orderType: 'table' as const })),
+    ...tableOrders.map(order => ({ ...order, orderType: 'table' as const })),
     ...whatsappOrders.map(order => ({ ...order, orderType: 'whatsapp' as const }))
   ];
 
@@ -122,7 +133,7 @@ export const KDSApp: React.FC = () => {
               <p className="text-gray-600 mt-1">Painel de controle de pedidos</p>
             </div>
             <button
-              onClick={loadWhatsAppOrders}
+              onClick={loadOrders}
               disabled={isLoading}
               className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
             >
@@ -228,6 +239,8 @@ export const KDSApp: React.FC = () => {
                 key={order.id} 
                 order={order} 
                 onStatusUpdate={handleStatusUpdate}
+                tables={state.tables.map(t => ({ id: t.id, number: t.number }))}
+                seats={state.seats.map(s => ({ id: s.id, guestName: s.guestName, seatNumber: s.seatNumber }))}
               />
             ))}
           </div>

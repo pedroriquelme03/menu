@@ -5,11 +5,15 @@ import { Clock, CheckCircle, Package, Truck, MessageCircle, Users, Phone, MapPin
 interface UnifiedOrderTicketProps {
   order: Order | WhatsAppOrder;
   onStatusUpdate: (orderId: string, status: string) => void;
+  tables?: Array<{ id: string; number: number }>;
+  seats?: Array<{ id: string; guestName?: string; seatNumber?: number }>;
 }
 
 export const UnifiedOrderTicket: React.FC<UnifiedOrderTicketProps> = ({ 
   order, 
-  onStatusUpdate 
+  onStatusUpdate,
+  tables = [],
+  seats = []
 }) => {
   const isWhatsAppOrder = 'customerPhone' in order;
   const whatsappOrder = isWhatsAppOrder ? order as WhatsAppOrder : null;
@@ -72,8 +76,9 @@ export const UnifiedOrderTicket: React.FC<UnifiedOrderTicketProps> = ({
     if (isWhatsAppOrder && whatsappOrder) {
       return `WhatsApp #${whatsappOrder.id.slice(-8)}`;
     } else if (tableOrder) {
-      // Buscar informações da mesa e assento
-      const tableNumber = tableOrder.tableId; // Assumindo que tableId é o número da mesa
+      // Buscar número da mesa
+      const table = tables.find(t => t.id === tableOrder.tableId);
+      const tableNumber = table ? table.number : '?';
       return `Mesa ${tableNumber}`;
     }
     return 'Pedido';
@@ -83,7 +88,12 @@ export const UnifiedOrderTicket: React.FC<UnifiedOrderTicketProps> = ({
     if (isWhatsAppOrder && whatsappOrder) {
       return whatsappOrder.customerName || formatPhone(whatsappOrder.customerPhone);
     } else if (tableOrder) {
-      return `Assento ${tableOrder.seatId}`;
+      // Buscar informações do assento
+      const seat = seats.find(s => s.id === tableOrder.seatId);
+      if (seat) {
+        return seat.guestName || `Assento ${seat.seatNumber || '?'}`;
+      }
+      return `Assento ${tableOrder.seatId?.slice(0, 8) || '?'}`;
     }
     return '';
   };

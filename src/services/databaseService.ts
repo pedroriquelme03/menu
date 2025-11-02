@@ -283,7 +283,8 @@ export class DatabaseService {
       status: order.status as any,
       createdAt: new Date(order.created_at),
       updatedAt: new Date(order.updated_at),
-      notes: order.notes
+      notes: order.notes,
+      orderType: 'table' as const
     })) || [];
   }
 
@@ -315,7 +316,8 @@ export class DatabaseService {
       status: data.status as any,
       createdAt: new Date(data.created_at),
       updatedAt: new Date(data.updated_at),
-      notes: data.notes
+      notes: data.notes,
+      orderType: 'table' as const
     };
   }
 

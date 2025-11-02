@@ -1,8 +1,8 @@
 import React from 'react';
 import { useRestaurant } from '../../contexts/RestaurantContext';
 import { Order, OrderItem } from '../../types';
+import { DatabaseService } from '../../services/databaseService';
 import { Trash2, Plus, Minus, Send, ShoppingCart } from 'lucide-react';
-import { v4 as uuidv4 } from 'uuid';
 
 export const CartView: React.FC = () => {
   const { state, dispatch } = useRestaurant();
@@ -34,31 +34,31 @@ export const CartView: React.FC = () => {
     dispatch({ type: 'REMOVE_FROM_CART', payload: itemId });
   };
 
-  const sendOrder = () => {
+  const sendOrder = async () => {
     if (state.cart.length === 0 || !state.currentSeat) return;
 
-    const order: Order = {
-      id: uuidv4(),
-      tableId: state.currentSeat.tableId,
+    const orderData = {
+      tableId: state.currentSeat.tableId!,
       seatId: state.currentSeat.id,
       items: [...state.cart],
       subtotal: cartTotal,
-      status: 'pending',
-      createdAt: new Date(),
-      updatedAt: new Date()
+      status: 'pending' as const,
+      notes: undefined
     };
 
-    dispatch({ type: 'CREATE_ORDER', payload: order });
-    dispatch({ type: 'CLEAR_CART' });
+    // Salvar no banco de dados
+    const savedOrder = await DatabaseService.createOrder(orderData);
     
-    // Simulate status updates
-    setTimeout(() => {
-      dispatch({ type: 'UPDATE_ORDER_STATUS', payload: { orderId: order.id, status: 'confirmed' } });
-    }, 2000);
-    
-    setTimeout(() => {
-      dispatch({ type: 'UPDATE_ORDER_STATUS', payload: { orderId: order.id, status: 'preparing' } });
-    }, 5000);
+    if (savedOrder) {
+      // Atualizar estado local com o pedido salvo
+      dispatch({ type: 'CREATE_ORDER', payload: savedOrder });
+      dispatch({ type: 'CLEAR_CART' });
+      
+      // Mostrar feedback de sucesso
+      alert('Pedido enviado com sucesso!');
+    } else {
+      alert('Erro ao enviar pedido. Tente novamente.');
+    }
   };
 
   if (state.cart.length === 0) {
