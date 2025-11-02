@@ -21,11 +21,6 @@
       "runtime": "@vercel/node@3.0.7"
     }
   },
-  "buildCommand": "npm run build",
-  "devCommand": "npm run dev",
-  "installCommand": "npm install",
-  "framework": "vite",
-  "nodeVersion": "18.x",
   "env": {
     "VITE_SUPABASE_URL": "https://rxhixzmvsaozyzlfxsbs.supabase.co",
     "VITE_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ4aGl4em12c2Fvenl6bGZ4c2JzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYxNzcxMzIsImV4cCI6MjA3MTc1MzEzMn0.s83NeO_2eWLUMHPQ7Rwbf5KcJthNANnkOAes3RW70L8"
