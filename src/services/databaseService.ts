@@ -312,6 +312,14 @@ export class DatabaseService {
   }
 
   static async createOrder(order: Omit<Order, 'id' | 'createdAt' | 'updatedAt'>): Promise<Order | null> {
+    console.log('Criando pedido:', {
+      tableId: order.tableId,
+      seatId: order.seatId,
+      itemsCount: order.items.length,
+      subtotal: order.subtotal,
+      status: order.status
+    });
+
     const { data, error } = await supabase
       .from('orders')
       .insert({
@@ -327,8 +335,21 @@ export class DatabaseService {
 
     if (error) {
       console.error('Erro ao criar pedido:', error);
+      console.error('Detalhes do erro:', {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code
+      });
       return null;
     }
+
+    if (!data) {
+      console.error('Nenhum dado retornado ao criar pedido');
+      return null;
+    }
+
+    console.log('Pedido criado com sucesso:', data.id);
 
     return {
       id: data.id,

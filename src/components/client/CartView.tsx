@@ -48,10 +48,12 @@ export const CartView: React.FC = () => {
     };
 
     try {
+      console.log('Enviando pedido com dados:', orderData);
       // Salvar no banco de dados
       const savedOrder = await DatabaseService.createOrder(orderData);
       
       if (savedOrder) {
+        console.log('Pedido salvo com sucesso:', savedOrder.id);
         // Atualizar estado local com o pedido salvo
         dispatch({ type: 'CREATE_ORDER', payload: savedOrder });
         dispatch({ type: 'CLEAR_CART' });
@@ -59,11 +61,13 @@ export const CartView: React.FC = () => {
         // Mostrar feedback de sucesso
         alert('Pedido enviado com sucesso!');
       } else {
-        alert('Erro ao enviar pedido. Verifique se você está conectado à mesa.');
+        console.error('Falha ao salvar pedido - savedOrder é null');
+        alert('Erro ao enviar pedido. Verifique o console para mais detalhes.');
       }
     } catch (error) {
       console.error('Erro ao enviar pedido:', error);
-      alert('Erro ao enviar pedido. Verifique sua conexão e tente novamente.');
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      alert(`Erro ao enviar pedido: ${errorMessage}`);
     }
   };
 
