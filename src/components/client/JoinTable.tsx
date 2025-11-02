@@ -54,21 +54,39 @@ export const JoinTable: React.FC<JoinTableProps> = ({ table }) => {
       // Atualizar localStorage com o ID real do banco
       localStorage.setItem('currentSeatId', savedSeat.id);
 
-      // Ocupar a mesa no estado local
-      dispatch({ type: 'OCCUPY_TABLE', payload: { tableId: table.id, sessionId } });
-      
-      // Adicionar assento ao estado local com o ID do banco
+      // Recarregar mesas e assentos do banco para garantir sincronização
+      const [updatedTables, updatedSeats] = await Promise.all([
+        DatabaseService.getTables(),
+        DatabaseService.getSeats()
+      ]);
+
+      // Atualizar estado com os dados atualizados do banco
+      updatedTables.forEach(t => {
+        if (t.id === table.id) {
+          dispatch({ type: 'OCCUPY_TABLE', payload: { tableId: t.id, sessionId } });
+        }
+      });
+
+      // Adicionar o assento criado ao estado
       dispatch({ type: 'ADD_SEAT', payload: savedSeat });
+      
+      // Definir o assento atual
       dispatch({ type: 'SET_CURRENT_SEAT', payload: savedSeat });
+      
+      // Forçar recarregamento da página ou atualização após um pequeno delay
+      // Isso garante que o useTableSession detecte a nova sessão
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
       
     } catch (error) {
       console.error('Erro ao entrar na mesa:', error);
+      alert('Erro ao entrar na mesa. Tente novamente.');
       // Limpar localStorage em caso de erro
       localStorage.removeItem('currentTableId');
       localStorage.removeItem('currentSessionId');
       localStorage.removeItem('currentSeatId');
       localStorage.removeItem('guestName');
-    } finally {
       setIsJoining(false);
     }
   };
