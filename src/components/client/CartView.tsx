@@ -1,6 +1,6 @@
 import React from 'react';
 import { useRestaurant } from '../../contexts/RestaurantContext';
-import { Order, OrderItem } from '../../types';
+import { OrderItem } from '../../types';
 import { DatabaseService } from '../../services/databaseService';
 import { Trash2, Plus, Minus, Send, ShoppingCart } from 'lucide-react';
 
@@ -43,7 +43,8 @@ export const CartView: React.FC = () => {
       items: [...state.cart],
       subtotal: cartTotal,
       status: 'pending' as const,
-      notes: undefined
+      notes: undefined,
+      orderType: 'table' as const
     };
 
     try {

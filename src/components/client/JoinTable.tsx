@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useRestaurant } from '../../contexts/RestaurantContext';
 import { DatabaseService } from '../../services/databaseService';
-import { Table, Seat } from '../../types';
+import { Table } from '../../types';
 import { Users, User } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 
