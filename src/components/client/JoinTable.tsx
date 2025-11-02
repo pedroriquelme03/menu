@@ -32,27 +32,34 @@ export const JoinTable: React.FC<JoinTableProps> = ({ table }) => {
       localStorage.setItem('currentSeatId', uuidv4());
       localStorage.setItem('guestName', guestName.trim() || '');
 
-      const newSeat: Seat = {
-        id: localStorage.getItem('currentSeatId')!,
-        tableId: table.id,
-        seatNumber: tableSeats.length + 1,
-        guestName: guestName.trim() || undefined,
-        deviceId,
-        joinedAt: new Date()
-      };
-
-      // Ocupar a mesa no banco de dados
+      // Ocupar a mesa no banco de dados primeiro
       const success = await DatabaseService.occupyTable(table.id, sessionId);
       if (!success) {
         throw new Error('Erro ao ocupar mesa');
       }
 
+      // Criar assento no banco de dados
+      const seatData = {
+        tableId: table.id,
+        seatNumber: tableSeats.length + 1,
+        guestName: guestName.trim() || undefined,
+        deviceId
+      };
+
+      const savedSeat = await DatabaseService.createSeat(seatData);
+      if (!savedSeat) {
+        throw new Error('Erro ao criar assento');
+      }
+
+      // Atualizar localStorage com o ID real do banco
+      localStorage.setItem('currentSeatId', savedSeat.id);
+
       // Ocupar a mesa no estado local
       dispatch({ type: 'OCCUPY_TABLE', payload: { tableId: table.id, sessionId } });
       
-      // Adicionar assento
-      dispatch({ type: 'ADD_SEAT', payload: newSeat });
-      dispatch({ type: 'SET_CURRENT_SEAT', payload: newSeat });
+      // Adicionar assento ao estado local com o ID do banco
+      dispatch({ type: 'ADD_SEAT', payload: savedSeat });
+      dispatch({ type: 'SET_CURRENT_SEAT', payload: savedSeat });
       
     } catch (error) {
       console.error('Erro ao entrar na mesa:', error);

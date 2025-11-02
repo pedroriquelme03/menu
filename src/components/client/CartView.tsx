@@ -46,18 +46,23 @@ export const CartView: React.FC = () => {
       notes: undefined
     };
 
-    // Salvar no banco de dados
-    const savedOrder = await DatabaseService.createOrder(orderData);
-    
-    if (savedOrder) {
-      // Atualizar estado local com o pedido salvo
-      dispatch({ type: 'CREATE_ORDER', payload: savedOrder });
-      dispatch({ type: 'CLEAR_CART' });
+    try {
+      // Salvar no banco de dados
+      const savedOrder = await DatabaseService.createOrder(orderData);
       
-      // Mostrar feedback de sucesso
-      alert('Pedido enviado com sucesso!');
-    } else {
-      alert('Erro ao enviar pedido. Tente novamente.');
+      if (savedOrder) {
+        // Atualizar estado local com o pedido salvo
+        dispatch({ type: 'CREATE_ORDER', payload: savedOrder });
+        dispatch({ type: 'CLEAR_CART' });
+        
+        // Mostrar feedback de sucesso
+        alert('Pedido enviado com sucesso!');
+      } else {
+        alert('Erro ao enviar pedido. Verifique se você está conectado à mesa.');
+      }
+    } catch (error) {
+      console.error('Erro ao enviar pedido:', error);
+      alert('Erro ao enviar pedido. Verifique sua conexão e tente novamente.');
     }
   };
 
