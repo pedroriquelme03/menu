@@ -75,16 +75,28 @@ export class DatabaseService {
   }
 
   static async occupyTable(id: string, sessionId: string): Promise<boolean> {
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('tables')
       .update({
         is_occupied: true,
         session_id: sessionId
       })
-      .eq('id', id);
+      .eq('id', id)
+      .select();
 
     if (error) {
       console.error('Erro ao ocupar mesa:', error);
+      console.error('Detalhes do erro:', {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code
+      });
+      return false;
+    }
+
+    if (!data || data.length === 0) {
+      console.error('Nenhuma mesa encontrada para atualizar');
       return false;
     }
 
@@ -144,6 +156,17 @@ export class DatabaseService {
 
     if (error) {
       console.error('Erro ao criar assento:', error);
+      console.error('Detalhes do erro:', {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code
+      });
+      return null;
+    }
+
+    if (!data) {
+      console.error('Nenhum dado retornado ao criar assento');
       return null;
     }
 

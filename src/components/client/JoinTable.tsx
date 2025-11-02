@@ -33,10 +33,13 @@ export const JoinTable: React.FC<JoinTableProps> = ({ table }) => {
       localStorage.setItem('guestName', guestName.trim() || '');
 
       // Ocupar a mesa no banco de dados primeiro
+      console.log('Ocupando mesa:', table.id, 'com sessionId:', sessionId);
       const success = await DatabaseService.occupyTable(table.id, sessionId);
       if (!success) {
-        throw new Error('Erro ao ocupar mesa');
+        console.error('Falha ao ocupar mesa no banco');
+        throw new Error('Erro ao ocupar mesa. Verifique sua conexão.');
       }
+      console.log('Mesa ocupada com sucesso');
 
       // Criar assento no banco de dados
       const seatData = {
@@ -46,10 +49,13 @@ export const JoinTable: React.FC<JoinTableProps> = ({ table }) => {
         deviceId
       };
 
+      console.log('Criando assento:', seatData);
       const savedSeat = await DatabaseService.createSeat(seatData);
       if (!savedSeat) {
-        throw new Error('Erro ao criar assento');
+        console.error('Falha ao criar assento no banco');
+        throw new Error('Erro ao criar assento. Verifique sua conexão.');
       }
+      console.log('Assento criado com sucesso:', savedSeat.id);
 
       // Atualizar localStorage com o ID real do banco
       localStorage.setItem('currentSeatId', savedSeat.id);
@@ -77,7 +83,8 @@ export const JoinTable: React.FC<JoinTableProps> = ({ table }) => {
       
     } catch (error) {
       console.error('Erro ao entrar na mesa:', error);
-      alert('Erro ao entrar na mesa. Tente novamente.');
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      alert(`Erro ao entrar na mesa: ${errorMessage}`);
       // Limpar localStorage em caso de erro
       localStorage.removeItem('currentTableId');
       localStorage.removeItem('currentSessionId');
