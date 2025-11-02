@@ -54,18 +54,14 @@ export const JoinTable: React.FC<JoinTableProps> = ({ table }) => {
       // Atualizar localStorage com o ID real do banco
       localStorage.setItem('currentSeatId', savedSeat.id);
 
-      // Recarregar mesas e assentos do banco para garantir sincronização
-      const [updatedTables, updatedSeats] = await Promise.all([
-        DatabaseService.getTables(),
-        DatabaseService.getSeats()
-      ]);
+      // Recarregar mesas do banco para garantir sincronização
+      const updatedTables = await DatabaseService.getTables();
 
       // Atualizar estado com os dados atualizados do banco
-      updatedTables.forEach(t => {
-        if (t.id === table.id) {
-          dispatch({ type: 'OCCUPY_TABLE', payload: { tableId: t.id, sessionId } });
-        }
-      });
+      const updatedTable = updatedTables.find(t => t.id === table.id);
+      if (updatedTable) {
+        dispatch({ type: 'OCCUPY_TABLE', payload: { tableId: updatedTable.id, sessionId } });
+      }
 
       // Adicionar o assento criado ao estado
       dispatch({ type: 'ADD_SEAT', payload: savedSeat });
