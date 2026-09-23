@@ -1,6 +1,6 @@
 import React from 'react';
 import { Order, WhatsAppOrder } from '../../types';
-import { Clock, CheckCircle, Package, Truck, MessageCircle, Users, Phone, MapPin } from 'lucide-react';
+import { Clock, CheckCircle, Package, Truck, MessageCircle, Users, Phone, MapPin, Siren } from 'lucide-react';
 
 interface UnifiedOrderTicketProps {
   order: Order | WhatsAppOrder;
@@ -99,17 +99,23 @@ export const UnifiedOrderTicket: React.FC<UnifiedOrderTicketProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow">
+    <div
+      className={`rounded-xl border p-4 shadow-sm transition-shadow hover:shadow-md ${
+        !isWhatsAppOrder && tableOrder?.chaseAlert
+          ? 'border-orange-400 bg-orange-50 ring-2 ring-orange-300 animate-pulse'
+          : 'border-gray-200 bg-white'
+      }`}
+    >
       {/* Header */}
-      <div className="flex items-center justify-between mb-3">
+      <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           {isWhatsAppOrder ? (
-            <MessageCircle className="w-5 h-5 text-green-600" />
+            <MessageCircle className="h-5 w-5 text-green-600" />
           ) : (
-            <Users className="w-5 h-5 text-blue-600" />
+            <Users className="h-5 w-5 text-blue-600" />
           )}
           <div>
-            <h3 className="font-semibold text-gray-800 text-sm">{getOrderTitle()}</h3>
+            <h3 className="text-sm font-semibold text-gray-800">{getOrderTitle()}</h3>
             <p className="text-xs text-gray-600">{getOrderSubtitle()}</p>
           </div>
         </div>
@@ -128,9 +134,16 @@ export const UnifiedOrderTicket: React.FC<UnifiedOrderTicketProps> = ({
         </div>
       </div>
 
+      {!isWhatsAppOrder && tableOrder?.chaseAlert && (
+        <div className="mb-3 flex items-center gap-2 rounded-lg bg-orange-600 px-3 py-2 text-sm font-bold text-white">
+          <Siren className="h-4 w-4" />
+          APURAR — garçom solicitou atenção
+        </div>
+      )}
+
       {/* Status */}
       <div className="mb-3">
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
+        <span className={`rounded-full px-2 py-1 text-xs font-medium ${getStatusColor(order.status)}`}>
           {getStatusLabel(order.status)}
         </span>
       </div>

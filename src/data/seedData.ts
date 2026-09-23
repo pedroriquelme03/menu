@@ -9,6 +9,7 @@ const generateTables = (): Table[] => {
       number: i,
       token: `table-${i}-${uuidv4().slice(0, 8)}`,
       capacity: i <= 10 ? 4 : i <= 15 ? 6 : 8,
+      praca: i <= 8 ? 'Salão' : i <= 14 ? 'Varanda' : 'Terraço',
       isOccupied: Math.random() > 0.7, // 30% ocupação
       createdAt: new Date()
     });

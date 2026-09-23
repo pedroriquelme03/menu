@@ -20,16 +20,22 @@ type RestaurantAction =
   | { type: 'UPDATE_CART_QUANTITY'; payload: { id: string; quantity: number } }
   | { type: 'CLEAR_CART' }
   | { type: 'CREATE_ORDER'; payload: Order }
+  | { type: 'UPDATE_ORDER'; payload: Order }
   | { type: 'UPDATE_ORDER_STATUS'; payload: { orderId: string; status: string; itemId?: string } }
   | { type: 'ADD_PAYMENT'; payload: Payment }
   | { type: 'CLOSE_TABLE'; payload: string }
   | { type: 'ADD_SEAT'; payload: Seat }
   | { type: 'ADD_TABLE'; payload: Table }
+  | { type: 'UPDATE_TABLE'; payload: Table }
+  | { type: 'DELETE_TABLE'; payload: string }
   | { type: 'OCCUPY_TABLE'; payload: { tableId: string; sessionId: string } }
   | { type: 'ADD_MENU_ITEM'; payload: MenuItem }
   | { type: 'UPDATE_MENU_ITEM'; payload: MenuItem }
   | { type: 'DELETE_MENU_ITEM'; payload: string }
-  | { type: 'LOAD_DATA'; payload: RestaurantState };
+  | { type: 'LOAD_DATA'; payload: RestaurantState }
+  | { type: 'SET_ORDERS'; payload: Order[] }
+  | { type: 'SET_TABLES'; payload: Table[] }
+  | { type: 'SET_SEATS'; payload: Seat[] };
 
 const initialState: RestaurantState = {
   tables: [],
@@ -45,6 +51,15 @@ const restaurantReducer = (state: RestaurantState, action: RestaurantAction): Re
   switch (action.type) {
     case 'LOAD_DATA':
       return { ...action.payload };
+
+    case 'SET_ORDERS':
+      return { ...state, orders: action.payload };
+
+    case 'SET_TABLES':
+      return { ...state, tables: action.payload };
+
+    case 'SET_SEATS':
+      return { ...state, seats: action.payload };
     
     case 'SET_CURRENT_SEAT':
       return { ...state, currentSeat: action.payload };
@@ -70,6 +85,14 @@ const restaurantReducer = (state: RestaurantState, action: RestaurantAction): Re
     
     case 'CREATE_ORDER':
       return { ...state, orders: [...state.orders, action.payload] };
+
+    case 'UPDATE_ORDER':
+      return {
+        ...state,
+        orders: state.orders.map(order =>
+          order.id === action.payload.id ? action.payload : order
+        )
+      };
     
     case 'UPDATE_ORDER_STATUS':
       return {
@@ -99,6 +122,20 @@ const restaurantReducer = (state: RestaurantState, action: RestaurantAction): Re
     
     case 'ADD_TABLE':
       return { ...state, tables: [...state.tables, action.payload] };
+
+    case 'UPDATE_TABLE':
+      return {
+        ...state,
+        tables: state.tables.map(table =>
+          table.id === action.payload.id ? action.payload : table
+        )
+      };
+
+    case 'DELETE_TABLE':
+      return {
+        ...state,
+        tables: state.tables.filter(table => table.id !== action.payload)
+      };
     
     case 'OCCUPY_TABLE':
       return {

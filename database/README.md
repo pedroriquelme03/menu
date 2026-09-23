@@ -17,19 +17,11 @@ Este diretório contém os scripts e configurações necessários para configura
 3. Copie e cole o conteúdo do arquivo `schema.sql`
 4. Clique em **Run** para executar
 
-### 2. Corrigir Políticas RLS (IMPORTANTE!)
+### 2. Políticas RLS
 
-Após executar o schema principal, execute também o arquivo `fix_rls_policies.sql` para permitir a criação de mesas e gerenciamento do cardápio:
+O `schema.sql` já inclui **todas** as políticas RLS necessárias para o app (CRUD de mesas, assentos, cardápio, pedidos, pagamentos e WhatsApp).
 
-1. No **SQL Editor**, copie e cole o conteúdo do arquivo `fix_rls_policies.sql`
-2. Clique em **Run** para executar
-3. Verifique se as políticas foram criadas corretamente
-
-**Políticas que serão criadas:**
-- ✅ Inserção de mesas (`tables`)
-- ✅ Inserção de itens do menu (`menu_items`)
-- ✅ Atualização de itens do menu (`menu_items`)
-- ✅ Exclusão de itens do menu (`menu_items`)
+Os arquivos `fix_*.sql` são legado — só use se estiver atualizando um banco antigo criado com schema incompleto.
 
 ### 3. Verificar as Tabelas
 
@@ -46,8 +38,8 @@ Após executar o schema, você deve ver as seguintes tabelas:
 No Vercel, certifique-se de que as seguintes variáveis estão configuradas:
 
 ```env
-VITE_SUPABASE_URL=https://rxhixzmvsaozyzlfxsbs.supabase.co
-VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ4aGl4em12c2Fvenl6bGZ4c2JzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYxNzcxMzIsImV4cCI6MjA3MTc1MzEzMn0.s83NeO_2eWLUMHPQ7Rwbf5KcJthNANnkOAes3RW70L8
+VITE_SUPABASE_URL=https://pxepuwymesswpgbxwkum.supabase.co
+VITE_SUPABASE_ANON_KEY=sua-chave-anon-do-dashboard
 ```
 
 **Para desenvolvimento local**, crie um arquivo `.env` na raiz do projeto com as mesmas variáveis.

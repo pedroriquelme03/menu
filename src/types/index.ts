@@ -3,6 +3,9 @@ export interface Table {
   number: number;
   token: string;
   capacity: number;
+  praca: string;
+  posX?: number | null;
+  posY?: number | null;
   isOccupied: boolean;
   sessionId?: string;
   createdAt: Date;
@@ -70,6 +73,8 @@ export interface Order {
   updatedAt: Date;
   notes?: string;
   orderType: 'table' | 'whatsapp'; // Tipo do pedido
+  chaseAlert?: boolean;
+  chasedAt?: Date;
 }
 
 export interface Payment {
@@ -88,6 +93,39 @@ export interface Staff {
   email: string;
   role: 'admin' | 'cashier' | 'kitchen' | 'waiter';
   isActive: boolean;
+}
+
+export interface WaiterCall {
+  id: string;
+  tableId: string;
+  seatId?: string;
+  reason: string;
+  status: 'pending' | 'attended' | 'cancelled';
+  createdAt: Date;
+  attendedAt?: Date;
+}
+
+export type ReservationStatus =
+  | 'pending'
+  | 'accepted'
+  | 'refused'
+  | 'waiting_client'
+  | 'occupied'
+  | 'completed'
+  | 'cancelled';
+
+export interface Reservation {
+  id: string;
+  customerName: string;
+  customerPhone: string;
+  customerEmail?: string;
+  partySize: number;
+  reservedAt: Date;
+  notes?: string;
+  tableId?: string;
+  status: ReservationStatus;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 // ===== TIPOS PARA INTEGRAÇÃO WHATSAPP =====

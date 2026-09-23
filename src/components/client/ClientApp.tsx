@@ -9,6 +9,7 @@ import { CartView } from './CartView';
 import { OrdersView } from './OrdersView';
 import { BillView } from './BillView';
 import { TabNavigation } from './TabNavigation';
+import { CallWaiterButton } from './CallWaiterButton';
 
 type ClientTab = 'menu' | 'cart' | 'orders' | 'bill';
 
@@ -26,6 +27,19 @@ export const ClientApp: React.FC = () => {
     }
   }, [tableToken, state.tables]);
 
+  // Aguardar mesas carregarem antes de decidir se o token é inválido
+  if (state.tables.length === 0 || isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto mb-4"></div>
+          <h2 className="text-xl font-semibold text-gray-800">Carregando...</h2>
+          <p className="text-gray-600">Preparando sua mesa</p>
+        </div>
+      </div>
+    );
+  }
+
   // Se não há mesa do token da URL, mostrar erro
   if (!tableFromToken) {
     return (
@@ -33,19 +47,6 @@ export const ClientApp: React.FC = () => {
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-800 mb-4">Mesa não encontrada</h2>
           <p className="text-gray-600">Token da mesa inválido ou expirado</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Se ainda está carregando a sessão, mostrar loading
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto mb-4"></div>
-          <h2 className="text-xl font-semibold text-gray-800">Carregando...</h2>
-          <p className="text-gray-600">Restaurando sua sessão</p>
         </div>
       </div>
     );
@@ -68,10 +69,17 @@ export const ClientApp: React.FC = () => {
                   {currentSeat.guestName || `Convidado ${currentSeat.seatNumber || 1}`}
                 </p>
               </div>
+            <div className="flex items-center gap-3">
+              <CallWaiterButton
+                tableId={currentTable.id}
+                seatId={currentSeat.id}
+                tableNumber={currentTable.number}
+              />
               <div className="text-right">
                 <div className="text-sm text-gray-500">Online</div>
-                <div className="w-2 h-2 bg-green-500 rounded-full ml-auto"></div>
+                <div className="ml-auto h-2 w-2 rounded-full bg-green-500" />
               </div>
+            </div>
             </div>
           </div>
         </div>

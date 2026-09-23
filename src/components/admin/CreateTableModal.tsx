@@ -41,6 +41,7 @@ export const CreateTableModal: React.FC<CreateTableModalProps> = ({
       const newTable = await DatabaseService.createTable({
         number,
         capacity,
+        praca: 'Salão',
         token: `table-${number}-${Math.random().toString(36).substr(2, 8)}`,
         isOccupied: false,
         sessionId: undefined

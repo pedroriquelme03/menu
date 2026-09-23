@@ -7,6 +7,9 @@ CREATE TABLE IF NOT EXISTS tables (
   number INTEGER NOT NULL UNIQUE,
   token TEXT NOT NULL UNIQUE,
   capacity INTEGER NOT NULL DEFAULT 4,
+  praca TEXT NOT NULL DEFAULT 'Salão',
+  pos_x NUMERIC(6,2),
+  pos_y NUMERIC(6,2),
   is_occupied BOOLEAN NOT NULL DEFAULT false,
   session_id TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -47,6 +50,9 @@ CREATE TABLE IF NOT EXISTS orders (
   notes TEXT
 );
 
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS chase_alert BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS chased_at TIMESTAMP WITH TIME ZONE;
+
 -- Tabela de pagamentos
 CREATE TABLE IF NOT EXISTS payments (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -80,6 +86,7 @@ CREATE TABLE IF NOT EXISTS whatsapp_orders (
 -- Índices para melhor performance
 CREATE INDEX IF NOT EXISTS idx_tables_number ON tables(number);
 CREATE INDEX IF NOT EXISTS idx_tables_token ON tables(token);
+CREATE INDEX IF NOT EXISTS idx_tables_praca ON tables(praca);
 CREATE INDEX IF NOT EXISTS idx_seats_table_id ON seats(table_id);
 CREATE INDEX IF NOT EXISTS idx_menu_items_category ON menu_items(category);
 CREATE INDEX IF NOT EXISTS idx_orders_table_id ON orders(table_id);
@@ -99,14 +106,16 @@ END;
 $$ language 'plpgsql';
 
 -- Trigger para atualizar updated_at automaticamente
-CREATE TRIGGER update_orders_updated_at 
-  BEFORE UPDATE ON orders 
-  FOR EACH ROW 
+DROP TRIGGER IF EXISTS update_orders_updated_at ON orders;
+CREATE TRIGGER update_orders_updated_at
+  BEFORE UPDATE ON orders
+  FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
 
-CREATE TRIGGER update_whatsapp_orders_updated_at 
-  BEFORE UPDATE ON whatsapp_orders 
-  FOR EACH ROW 
+DROP TRIGGER IF EXISTS update_whatsapp_orders_updated_at ON whatsapp_orders;
+CREATE TRIGGER update_whatsapp_orders_updated_at
+  BEFORE UPDATE ON whatsapp_orders
+  FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
 
 -- Políticas de segurança RLS (Row Level Security)
@@ -117,42 +126,114 @@ ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE payments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE whatsapp_orders ENABLE ROW LEVEL SECURITY;
 
--- Política para permitir leitura pública de mesas e menu
-CREATE POLICY "Allow public read access to tables" ON tables
-  FOR SELECT USING (true);
+-- tables
+DROP POLICY IF EXISTS "Allow public read access to tables" ON tables;
+CREATE POLICY "Allow public read access to tables" ON tables FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Allow public insert to tables" ON tables;
+CREATE POLICY "Allow public insert to tables" ON tables FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS "Allow public update tables" ON tables;
+CREATE POLICY "Allow public update tables" ON tables FOR UPDATE USING (true);
+DROP POLICY IF EXISTS "Allow public delete tables" ON tables;
+CREATE POLICY "Allow public delete tables" ON tables FOR DELETE USING (true);
 
-CREATE POLICY "Allow public insert to tables" ON tables
-  FOR INSERT WITH CHECK (true);
+-- seats
+DROP POLICY IF EXISTS "Allow public read access to seats" ON seats;
+CREATE POLICY "Allow public read access to seats" ON seats FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Allow public insert to seats" ON seats;
+CREATE POLICY "Allow public insert to seats" ON seats FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS "Allow public update seats" ON seats;
+CREATE POLICY "Allow public update seats" ON seats FOR UPDATE USING (true);
+DROP POLICY IF EXISTS "Allow public delete seats" ON seats;
+CREATE POLICY "Allow public delete seats" ON seats FOR DELETE USING (true);
 
-CREATE POLICY "Allow public read access to menu items" ON menu_items
-  FOR SELECT USING (true);
+-- menu_items
+DROP POLICY IF EXISTS "Allow public read access to menu items" ON menu_items;
+CREATE POLICY "Allow public read access to menu items" ON menu_items FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Allow public insert to menu items" ON menu_items;
+CREATE POLICY "Allow public insert to menu items" ON menu_items FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS "Allow public update menu items" ON menu_items;
+CREATE POLICY "Allow public update menu items" ON menu_items FOR UPDATE USING (true);
+DROP POLICY IF EXISTS "Allow public delete menu items" ON menu_items;
+CREATE POLICY "Allow public delete menu items" ON menu_items FOR DELETE USING (true);
 
--- Política para permitir inserção de assentos
-CREATE POLICY "Allow public insert to seats" ON seats
-  FOR INSERT WITH CHECK (true);
+-- orders
+DROP POLICY IF EXISTS "Allow public read access to orders" ON orders;
+CREATE POLICY "Allow public read access to orders" ON orders FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Allow public insert to orders" ON orders;
+CREATE POLICY "Allow public insert to orders" ON orders FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS "Allow public update orders" ON orders;
+CREATE POLICY "Allow public update orders" ON orders FOR UPDATE USING (true);
 
--- Política para permitir inserção de pedidos
-CREATE POLICY "Allow public insert to orders" ON orders
-  FOR INSERT WITH CHECK (true);
+-- payments
+DROP POLICY IF EXISTS "Allow public read access to payments" ON payments;
+CREATE POLICY "Allow public read access to payments" ON payments FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Allow public insert to payments" ON payments;
+CREATE POLICY "Allow public insert to payments" ON payments FOR INSERT WITH CHECK (true);
 
--- Política para permitir inserção de pagamentos
-CREATE POLICY "Allow public insert to payments" ON payments
-  FOR INSERT WITH CHECK (true);
+-- whatsapp_orders
+DROP POLICY IF EXISTS "Allow public read access to whatsapp orders" ON whatsapp_orders;
+CREATE POLICY "Allow public read access to whatsapp orders" ON whatsapp_orders FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Allow public insert to whatsapp orders" ON whatsapp_orders;
+CREATE POLICY "Allow public insert to whatsapp orders" ON whatsapp_orders FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS "Allow public update whatsapp orders" ON whatsapp_orders;
+CREATE POLICY "Allow public update whatsapp orders" ON whatsapp_orders FOR UPDATE USING (true);
 
--- Política para permitir atualização de pedidos
-CREATE POLICY "Allow public update orders" ON orders
-  FOR UPDATE USING (true);
+-- Chamados de garçom
+CREATE TABLE IF NOT EXISTS waiter_calls (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  table_id UUID NOT NULL REFERENCES tables(id) ON DELETE CASCADE,
+  seat_id UUID REFERENCES seats(id) ON DELETE SET NULL,
+  reason TEXT DEFAULT 'assistencia',
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'attended', 'cancelled')),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  attended_at TIMESTAMP WITH TIME ZONE
+);
 
--- Política para permitir atualização de mesas
-CREATE POLICY "Allow public update tables" ON tables
-  FOR UPDATE USING (true);
+CREATE INDEX IF NOT EXISTS idx_waiter_calls_status ON waiter_calls(status);
+CREATE INDEX IF NOT EXISTS idx_waiter_calls_table_id ON waiter_calls(table_id);
+CREATE INDEX IF NOT EXISTS idx_waiter_calls_created_at ON waiter_calls(created_at DESC);
 
--- Políticas para pedidos WhatsApp
-CREATE POLICY "Allow public read access to whatsapp orders" ON whatsapp_orders
-  FOR SELECT USING (true);
+ALTER TABLE waiter_calls ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Allow public insert to whatsapp orders" ON whatsapp_orders
-  FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS "Allow public read waiter calls" ON waiter_calls;
+CREATE POLICY "Allow public read waiter calls" ON waiter_calls FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Allow public insert waiter calls" ON waiter_calls;
+CREATE POLICY "Allow public insert waiter calls" ON waiter_calls FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS "Allow public update waiter calls" ON waiter_calls;
+CREATE POLICY "Allow public update waiter calls" ON waiter_calls FOR UPDATE USING (true);
 
-CREATE POLICY "Allow public update whatsapp orders" ON whatsapp_orders
-  FOR UPDATE USING (true);
+-- Reservas
+CREATE TABLE IF NOT EXISTS reservations (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  customer_name TEXT NOT NULL,
+  customer_phone TEXT NOT NULL,
+  customer_email TEXT,
+  party_size INTEGER NOT NULL CHECK (party_size > 0),
+  reserved_at TIMESTAMP WITH TIME ZONE NOT NULL,
+  notes TEXT,
+  table_id UUID REFERENCES tables(id) ON DELETE SET NULL,
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (
+    status IN ('pending', 'accepted', 'refused', 'waiting_client', 'occupied', 'completed', 'cancelled')
+  ),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_reservations_status ON reservations(status);
+CREATE INDEX IF NOT EXISTS idx_reservations_reserved_at ON reservations(reserved_at);
+CREATE INDEX IF NOT EXISTS idx_reservations_created_at ON reservations(created_at DESC);
+
+DROP TRIGGER IF EXISTS update_reservations_updated_at ON reservations;
+CREATE TRIGGER update_reservations_updated_at
+  BEFORE UPDATE ON reservations
+  FOR EACH ROW
+  EXECUTE FUNCTION update_updated_at_column();
+
+ALTER TABLE reservations ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Allow public read reservations" ON reservations;
+CREATE POLICY "Allow public read reservations" ON reservations FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Allow public insert reservations" ON reservations;
+CREATE POLICY "Allow public insert reservations" ON reservations FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS "Allow public update reservations" ON reservations;
+CREATE POLICY "Allow public update reservations" ON reservations FOR UPDATE USING (true);

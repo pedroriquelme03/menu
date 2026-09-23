@@ -2,11 +2,27 @@ import { supabase } from '../lib/supabase';
 import { Table, Seat, MenuItem, Order, Payment } from '../types';
 
 export class DatabaseService {
+  private static mapTable(table: any): Table {
+    return {
+      id: table.id,
+      number: table.number,
+      token: table.token,
+      capacity: table.capacity,
+      praca: table.praca || 'Salão',
+      posX: table.pos_x != null ? Number(table.pos_x) : null,
+      posY: table.pos_y != null ? Number(table.pos_y) : null,
+      isOccupied: table.is_occupied,
+      sessionId: table.session_id,
+      createdAt: new Date(table.created_at),
+    };
+  }
+
   // ===== TABLES =====
   static async getTables(): Promise<Table[]> {
     const { data, error } = await supabase
       .from('tables')
       .select('*')
+      .order('praca')
       .order('number');
 
     if (error) {
@@ -14,15 +30,7 @@ export class DatabaseService {
       return [];
     }
 
-    return data?.map(table => ({
-      id: table.id,
-      number: table.number,
-      token: table.token,
-      capacity: table.capacity,
-      isOccupied: table.is_occupied,
-      sessionId: table.session_id,
-      createdAt: new Date(table.created_at)
-    })) || [];
+    return data?.map((table) => this.mapTable(table)) || [];
   }
 
   static async createTable(table: Omit<Table, 'id' | 'createdAt'>): Promise<Table | null> {
@@ -32,6 +40,9 @@ export class DatabaseService {
         number: table.number,
         token: table.token,
         capacity: table.capacity,
+        praca: table.praca || 'Salão',
+        pos_x: table.posX ?? null,
+        pos_y: table.posY ?? null,
         is_occupied: table.isOccupied,
         session_id: table.sessionId
       })
@@ -43,31 +54,43 @@ export class DatabaseService {
       return null;
     }
 
-    return {
-      id: data.id,
-      number: data.number,
-      token: data.token,
-      capacity: data.capacity,
-      isOccupied: data.is_occupied,
-      sessionId: data.session_id,
-      createdAt: new Date(data.created_at)
-    };
+    return this.mapTable(data);
   }
 
-  static async updateTable(id: string, updates: Partial<Table>): Promise<boolean> {
-    const { error } = await supabase
+  static async updateTable(id: string, updates: Partial<Table>): Promise<Table | null> {
+    const payload: Record<string, unknown> = {};
+    if (updates.number !== undefined) payload.number = updates.number;
+    if (updates.token !== undefined) payload.token = updates.token;
+    if (updates.capacity !== undefined) payload.capacity = updates.capacity;
+    if (updates.praca !== undefined) payload.praca = updates.praca;
+    if (updates.posX !== undefined) payload.pos_x = updates.posX;
+    if (updates.posY !== undefined) payload.pos_y = updates.posY;
+    if (updates.isOccupied !== undefined) payload.is_occupied = updates.isOccupied;
+    if (updates.sessionId !== undefined) payload.session_id = updates.sessionId;
+
+    const { data, error } = await supabase
       .from('tables')
-      .update({
-        number: updates.number,
-        token: updates.token,
-        capacity: updates.capacity,
-        is_occupied: updates.isOccupied,
-        session_id: updates.sessionId
-      })
-      .eq('id', id);
+      .update(payload)
+      .eq('id', id)
+      .select()
+      .single();
 
     if (error) {
       console.error('Erro ao atualizar mesa:', error);
+      return null;
+    }
+
+    return this.mapTable(data);
+  }
+
+  static async deleteTable(id: string): Promise<boolean> {
+    const { error } = await supabase
+      .from('tables')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error('Erro ao excluir mesa:', error);
       return false;
     }
 
@@ -307,7 +330,9 @@ export class DatabaseService {
       createdAt: new Date(order.created_at),
       updatedAt: new Date(order.updated_at),
       notes: order.notes,
-      orderType: 'table' as const
+      orderType: 'table' as const,
+      chaseAlert: Boolean(order.chase_alert),
+      chasedAt: order.chased_at ? new Date(order.chased_at) : undefined,
     })) || [];
   }
 
@@ -361,17 +386,26 @@ export class DatabaseService {
       createdAt: new Date(data.created_at),
       updatedAt: new Date(data.updated_at),
       notes: data.notes,
-      orderType: 'table' as const
+      orderType: 'table' as const,
+      chaseAlert: Boolean(data.chase_alert),
+      chasedAt: data.chased_at ? new Date(data.chased_at) : undefined,
     };
   }
 
   static async updateOrderStatus(id: string, status: string): Promise<boolean> {
+    const payload: Record<string, unknown> = {
+      status,
+      updated_at: new Date().toISOString(),
+    };
+
+    // Ao avançar status na cozinha, limpa o alerta de apuração
+    if (['confirmed', 'preparing', 'ready', 'delivered', 'cancelled'].includes(status)) {
+      payload.chase_alert = false;
+    }
+
     const { error } = await supabase
       .from('orders')
-      .update({ 
-        status,
-        updated_at: new Date().toISOString()
-      })
+      .update(payload)
       .eq('id', id);
 
     if (error) {
@@ -380,6 +414,39 @@ export class DatabaseService {
     }
 
     return true;
+  }
+
+  static async chaseOrder(id: string): Promise<Order | null> {
+    const { data, error } = await supabase
+      .from('orders')
+      .update({
+        chase_alert: true,
+        chased_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Erro ao apurar pedido:', error);
+      return null;
+    }
+
+    return {
+      id: data.id,
+      tableId: data.table_id,
+      seatId: data.seat_id,
+      items: data.items || [],
+      subtotal: data.subtotal,
+      status: data.status as any,
+      createdAt: new Date(data.created_at),
+      updatedAt: new Date(data.updated_at),
+      notes: data.notes,
+      orderType: 'table' as const,
+      chaseAlert: Boolean(data.chase_alert),
+      chasedAt: data.chased_at ? new Date(data.chased_at) : undefined,
+    };
   }
 
   // ===== PAYMENTS =====
@@ -437,43 +504,18 @@ export class DatabaseService {
   // ===== INITIALIZATION =====
   static async initializeDatabase(): Promise<void> {
     try {
-      // Verificar se já existem dados
-      const { data: existingTables } = await supabase
-        .from('tables')
-        .select('count')
+      const { data: existingMenu } = await supabase
+        .from('menu_items')
+        .select('id')
         .limit(1);
 
-      if (existingTables && existingTables.length > 0) {
+      if (existingMenu && existingMenu.length > 0) {
         console.log('Banco de dados já inicializado');
         return;
       }
 
-      console.log('Inicializando banco de dados...');
-      
-      // Criar tabelas padrão
-      const defaultTables = [
-        { number: 1, capacity: 4 },
-        { number: 2, capacity: 4 },
-        { number: 3, capacity: 6 },
-        { number: 4, capacity: 6 },
-        { number: 5, capacity: 8 },
-        { number: 6, capacity: 8 },
-        { number: 7, capacity: 4 },
-        { number: 8, capacity: 4 },
-        { number: 9, capacity: 6 },
-        { number: 10, capacity: 6 }
-      ];
+      console.log('Inicializando cardápio padrão...');
 
-      for (const table of defaultTables) {
-        await this.createTable({
-          ...table,
-          token: `table-${table.number}-${Math.random().toString(36).substr(2, 8)}`,
-          isOccupied: false,
-          sessionId: undefined
-        });
-      }
-
-      // Criar itens do menu padrão
       const defaultMenuItems = [
         {
           name: "Bruschetta Tradicional",
@@ -505,7 +547,7 @@ export class DatabaseService {
         await this.createMenuItem(item);
       }
 
-      console.log('Banco de dados inicializado com sucesso!');
+      console.log('Cardápio padrão inicializado. Cadastre as mesas em Admin → Cadastro Mesas.');
     } catch (error) {
       console.error('Erro ao inicializar banco de dados:', error);
     }

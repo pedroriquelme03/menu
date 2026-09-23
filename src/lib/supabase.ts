@@ -1,7 +1,16 @@
 import { createClient } from '@supabase/supabase-js';
+import { environment } from '../config/environment';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabaseUrl =
+  import.meta.env.VITE_SUPABASE_URL || environment.supabase.url;
+const supabaseAnonKey =
+  import.meta.env.VITE_SUPABASE_ANON_KEY || environment.supabase.anonKey;
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.error(
+    'Supabase não configurado. Defina VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY no arquivo .env'
+  );
+}
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
@@ -17,6 +26,9 @@ export interface Database {
           capacity: number;
           is_occupied: boolean;
           session_id?: string;
+          praca?: string;
+          pos_x?: number | null;
+          pos_y?: number | null;
           created_at: string;
         };
         Insert: {
@@ -26,6 +38,9 @@ export interface Database {
           capacity: number;
           is_occupied?: boolean;
           session_id?: string;
+          praca?: string;
+          pos_x?: number | null;
+          pos_y?: number | null;
           created_at?: string;
         };
         Update: {
@@ -35,6 +50,9 @@ export interface Database {
           capacity?: number;
           is_occupied?: boolean;
           session_id?: string;
+          praca?: string;
+          pos_x?: number | null;
+          pos_y?: number | null;
           created_at?: string;
         };
       };

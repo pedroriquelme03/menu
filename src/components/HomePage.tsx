@@ -52,32 +52,60 @@ export const HomePage: React.FC = () => {
               </button>
               
               {showTables && (
-                <div className="bg-gray-50 rounded-xl p-6 space-y-3 max-h-64 overflow-y-auto">
+                <div className="bg-gray-50 rounded-xl p-6 space-y-4 max-h-80 overflow-y-auto">
                   {availableTables.length > 0 ? (
-                    availableTables.map((table) => (
-                      <Link
-                        key={table.id}
-                        to={`/table/${table.token}`}
-                        className="block bg-white text-gray-800 px-6 py-4 rounded-lg hover:bg-orange-50 transition-colors text-base border border-gray-200 hover:border-orange-300"
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="font-semibold text-lg">Mesa {table.number}</span>
-                          <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
-                            {table.capacity} {table.capacity === 1 ? 'lugar' : 'lugares'}
-                          </span>
-                        </div>
-                      </Link>
+                    Array.from(
+                      availableTables.reduce((map, table) => {
+                        const key = table.praca || 'Salão';
+                        const list = map.get(key) || [];
+                        list.push(table);
+                        map.set(key, list);
+                        return map;
+                      }, new Map<string, typeof availableTables>())
+                    ).map(([praca, tables]) => (
+                      <div key={praca} className="space-y-2">
+                        <p className="text-left text-xs font-semibold uppercase tracking-wide text-gray-400">
+                          {praca}
+                        </p>
+                        {tables
+                          .sort((a, b) => a.number - b.number)
+                          .map((table) => (
+                            <Link
+                              key={table.id}
+                              to={`/table/${table.token}`}
+                              className="block rounded-lg border border-gray-200 bg-white px-6 py-4 text-base text-gray-800 transition-colors hover:border-orange-300 hover:bg-orange-50"
+                            >
+                              <div className="flex items-center justify-between">
+                                <span className="text-lg font-semibold">Mesa {table.number}</span>
+                                <span className="rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-500">
+                                  {table.capacity} {table.capacity === 1 ? 'lugar' : 'lugares'}
+                                </span>
+                              </div>
+                            </Link>
+                          ))}
+                      </div>
                     ))
                   ) : (
-                    <div className="text-center py-6">
-                      <p className="text-gray-500 text-base">Todas as mesas estão ocupadas</p>
-                      <p className="text-sm text-gray-400 mt-2">Aguarde uma mesa ficar disponível</p>
+                    <div className="py-6 text-center">
+                      <p className="text-base text-gray-500">Nenhuma mesa disponível</p>
+                      <p className="mt-2 text-sm text-gray-400">
+                        Aguarde ou peça ao salão para cadastrar mesas
+                      </p>
                     </div>
                   )}
                 </div>
               )}
             </div>
           </div>
+        </div>
+
+        <div className="mx-auto mt-8 max-w-2xl text-center">
+          <Link
+            to="/reserva"
+            className="inline-flex items-center gap-2 rounded-xl border border-orange-200 bg-white px-6 py-3 text-base font-semibold text-orange-700 shadow-sm transition-colors hover:bg-orange-50"
+          >
+            Solicitar reserva de mesa
+          </Link>
         </div>
 
         {/* Footer */}

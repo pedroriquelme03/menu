@@ -80,7 +80,12 @@ export const KDSApp: React.FC = () => {
           setTableOrders(orders =>
             orders.map(order =>
               order.id === orderId
-                ? { ...order, status: status as any, updatedAt: new Date() }
+                ? {
+                    ...order,
+                    status: status as any,
+                    updatedAt: new Date(),
+                    chaseAlert: false,
+                  }
                 : order
             )
           );
@@ -109,7 +114,12 @@ export const KDSApp: React.FC = () => {
       : order.orderType === activeSource;
 
     return statusMatch && sourceMatch;
-  }).sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+  }).sort((a, b) => {
+    const aChase = 'chaseAlert' in a && a.chaseAlert ? 1 : 0;
+    const bChase = 'chaseAlert' in b && b.chaseAlert ? 1 : 0;
+    if (aChase !== bChase) return bChase - aChase;
+    return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+  });
 
   const orderCounts = {
     pending: allOrders.filter(o => o.status === 'pending').length,

@@ -52,7 +52,9 @@ export const TableCard: React.FC<TableCardProps> = ({ table, onPayment, onGenera
           </div>
           <div>
             <h3 className="font-semibold text-gray-800">Mesa {table.number}</h3>
-            <p className="text-sm text-gray-500">{table.capacity} lugares</p>
+            <p className="text-sm text-gray-500">
+              {table.praca || 'Salão'} · {table.capacity} lugares
+            </p>
           </div>
         </div>
         
