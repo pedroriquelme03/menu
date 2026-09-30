@@ -236,6 +236,7 @@ export class DatabaseService {
       description: item.description,
       price: item.price,
       category: item.category,
+      station: (item.station === 'cambuza' ? 'cambuza' : 'kitchen') as const,
       imageUrl: item.image_url,
       isAvailable: item.is_available,
       modifiers: [] // Por enquanto vazio, pode ser expandido depois
@@ -250,6 +251,7 @@ export class DatabaseService {
         description: item.description,
         price: item.price,
         category: item.category,
+        station: item.station || 'kitchen',
         image_url: item.imageUrl,
         is_available: item.isAvailable
       })
@@ -267,6 +269,7 @@ export class DatabaseService {
       description: data.description,
       price: data.price,
       category: data.category,
+      station: data.station === 'cambuza' ? 'cambuza' : 'kitchen',
       imageUrl: data.image_url,
       isAvailable: data.is_available,
       modifiers: []
@@ -281,6 +284,7 @@ export class DatabaseService {
         description: updates.description,
         price: updates.price,
         category: updates.category,
+        station: updates.station,
         image_url: updates.imageUrl,
         is_available: updates.isAvailable
       })
@@ -504,10 +508,15 @@ export class DatabaseService {
   // ===== INITIALIZATION =====
   static async initializeDatabase(): Promise<void> {
     try {
-      const { data: existingMenu } = await supabase
+      const { data: existingMenu, error } = await supabase
         .from('menu_items')
         .select('id')
         .limit(1);
+
+      if (error) {
+        console.error('Erro ao verificar cardápio (banco indisponível):', error.message);
+        return;
+      }
 
       if (existingMenu && existingMenu.length > 0) {
         console.log('Banco de dados já inicializado');
@@ -522,6 +531,7 @@ export class DatabaseService {
           description: "Pão italiano tostado com tomate, manjericão e azeite extra virgem",
           price: 24.90,
           category: "Entradas",
+          station: 'kitchen' as const,
           imageUrl: "https://images.pexels.com/photos/5840071/pexels-photo-5840071.jpeg",
           isAvailable: true
         },
@@ -530,6 +540,7 @@ export class DatabaseService {
           description: "Blend da casa 180g, queijo, alface, tomate e batata rústica",
           price: 42.90,
           category: "Pratos Principais",
+          station: 'kitchen' as const,
           imageUrl: "https://images.pexels.com/photos/1639557/pexels-photo-1639557.jpeg",
           isAvailable: true
         },
@@ -538,6 +549,7 @@ export class DatabaseService {
           description: "Refrigerante gelado 350ml",
           price: 8.90,
           category: "Bebidas",
+          station: 'cambuza' as const,
           imageUrl: "https://images.pexels.com/photos/50593/coca-cola-cold-drink-soft-drink-coke-50593.jpeg",
           isAvailable: true
         }

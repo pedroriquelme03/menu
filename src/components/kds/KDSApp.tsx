@@ -3,13 +3,18 @@ import { useRestaurant } from '../../contexts/RestaurantContext';
 import { WhatsAppService } from '../../services/whatsappService';
 import { DatabaseService } from '../../services/databaseService';
 import { UnifiedOrderTicket } from './UnifiedOrderTicket';
-import { Order, WhatsAppOrder } from '../../types';
-import { ChefHat, Clock, CheckCircle, Package, MessageCircle, Users, RefreshCw } from 'lucide-react';
+import { Order, PrepStation, WhatsAppOrder } from '../../types';
+import { ChefHat, Clock, CheckCircle, Package, MessageCircle, Users, RefreshCw, GlassWater } from 'lucide-react';
+import { orderHasStationItems, stationLabel } from '../../utils/prepStation';
 
 type KDSFilter = 'all' | 'pending' | 'confirmed' | 'preparing' | 'ready' | 'cancelled';
 type OrderSource = 'all' | 'table' | 'whatsapp';
 
-export const KDSApp: React.FC = () => {
+interface KDSAppProps {
+  station?: PrepStation;
+}
+
+export const KDSApp: React.FC<KDSAppProps> = ({ station = 'kitchen' }) => {
   const { state } = useRestaurant();
   const [activeFilter, setActiveFilter] = useState<KDSFilter>('all');
   const [activeSource, setActiveSource] = useState<OrderSource>('all');
@@ -17,8 +22,11 @@ export const KDSApp: React.FC = () => {
   const [tableOrders, setTableOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
+  const isCambuza = station === 'cambuza';
+  const StationIcon = isCambuza ? GlassWater : ChefHat;
+
   const filters = [
-    { id: 'all' as KDSFilter, label: 'Todos', icon: ChefHat },
+    { id: 'all' as KDSFilter, label: 'Todos', icon: StationIcon },
     { id: 'pending' as KDSFilter, label: 'Pendentes', icon: Clock },
     { id: 'confirmed' as KDSFilter, label: 'Confirmados', icon: CheckCircle },
     { id: 'preparing' as KDSFilter, label: 'Preparando', icon: Clock },
@@ -27,9 +35,9 @@ export const KDSApp: React.FC = () => {
   ];
 
   const sourceFilters = [
-    { id: 'all' as OrderSource, label: 'Todos', icon: ChefHat },
+    { id: 'all' as OrderSource, label: 'Todos', icon: StationIcon },
     { id: 'table' as OrderSource, label: 'Mesas', icon: Users },
-    { id: 'whatsapp' as OrderSource, label: 'WhatsApp', icon: MessageCircle }
+    { id: 'whatsapp' as OrderSource, label: 'Delivery', icon: MessageCircle }
   ];
 
   useEffect(() => {
@@ -103,12 +111,12 @@ export const KDSApp: React.FC = () => {
   ];
 
   const filteredOrders = allOrders.filter(order => {
-    // Filtro por status
+    if (!orderHasStationItems(order.items, station)) return false;
+
     const statusMatch = activeFilter === 'all' 
       ? order.status !== 'delivered'
       : order.status === activeFilter;
 
-    // Filtro por fonte
     const sourceMatch = activeSource === 'all' 
       ? true 
       : order.orderType === activeSource;
@@ -121,12 +129,14 @@ export const KDSApp: React.FC = () => {
     return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
   });
 
+  const stationOrders = allOrders.filter((o) => orderHasStationItems(o.items, station));
+
   const orderCounts = {
-    pending: allOrders.filter(o => o.status === 'pending').length,
-    confirmed: allOrders.filter(o => o.status === 'confirmed').length,
-    preparing: allOrders.filter(o => o.status === 'preparing').length,
-    ready: allOrders.filter(o => o.status === 'ready').length,
-    cancelled: allOrders.filter(o => o.status === 'cancelled').length
+    pending: stationOrders.filter(o => o.status === 'pending').length,
+    confirmed: stationOrders.filter(o => o.status === 'confirmed').length,
+    preparing: stationOrders.filter(o => o.status === 'preparing').length,
+    ready: stationOrders.filter(o => o.status === 'ready').length,
+    cancelled: stationOrders.filter(o => o.status === 'cancelled').length
   };
 
   return (
@@ -137,15 +147,21 @@ export const KDSApp: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-3">
-                <ChefHat className="w-8 h-8 text-green-600" />
-                Sistema da Cozinha (KDS)
+                <StationIcon className={`w-8 h-8 ${isCambuza ? 'text-sky-600' : 'text-green-600'}`} />
+                {isCambuza ? 'Cambuza' : 'Sistema da Cozinha (KDS)'}
               </h1>
-              <p className="text-gray-600 mt-1">Painel de controle de pedidos</p>
+              <p className="text-gray-600 mt-1">
+                {isCambuza
+                  ? 'Itens prontos para servir (água, refrigerante, etc.)'
+                  : `Pedidos que a ${stationLabel('kitchen').toLowerCase()} precisa preparar`}
+              </p>
             </div>
             <button
               onClick={loadOrders}
               disabled={isLoading}
-              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+              className={`flex items-center gap-2 px-4 py-2 text-white rounded-lg transition-colors disabled:opacity-50 ${
+                isCambuza ? 'bg-sky-600 hover:bg-sky-700' : 'bg-green-600 hover:bg-green-700'
+              }`}
             >
               <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
               Atualizar
@@ -171,7 +187,7 @@ export const KDSApp: React.FC = () => {
                   onClick={() => setActiveFilter(filter.id)}
                   className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-colors whitespace-nowrap ${
                     activeFilter === filter.id
-                      ? 'bg-green-600 text-white'
+                      ? isCambuza ? 'bg-sky-600 text-white' : 'bg-green-600 text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
@@ -180,8 +196,8 @@ export const KDSApp: React.FC = () => {
                   {count > 0 && (
                     <span className={`px-2 py-1 rounded-full text-xs font-bold ${
                       activeFilter === filter.id
-                        ? 'bg-white text-green-600'
-                        : 'bg-green-600 text-white'
+                        ? isCambuza ? 'bg-white text-sky-600' : 'bg-white text-green-600'
+                        : isCambuza ? 'bg-sky-600 text-white' : 'bg-green-600 text-white'
                     }`}>
                       {count}
                     </span>
@@ -196,8 +212,8 @@ export const KDSApp: React.FC = () => {
             {sourceFilters.map((filter) => {
               const Icon = filter.icon;
               const count = filter.id === 'all' 
-                ? allOrders.length 
-                : allOrders.filter(o => o.orderType === filter.id).length;
+                ? stationOrders.length 
+                : stationOrders.filter(o => o.orderType === filter.id).length;
               
               return (
                 <button
@@ -233,11 +249,13 @@ export const KDSApp: React.FC = () => {
           <div className="text-center py-12">
             <ChefHat className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <h2 className="text-xl font-semibold text-gray-800 mb-2">
-              {activeFilter === 'all' ? 'Nenhum pedido ativo' : `Nenhum pedido ${activeFilter}`}
+              {activeFilter === 'all' ? `Nenhum pedido na ${stationLabel(station).toLowerCase()}` : `Nenhum pedido ${activeFilter}`}
             </h2>
             <p className="text-gray-600">
               {activeFilter === 'all' 
-                ? 'Quando houver pedidos, eles aparecerão aqui'
+                ? isCambuza
+                  ? 'Bebidas e itens prontos aparecerão aqui'
+                  : 'Quando houver pratos para preparar, eles aparecerão aqui'
                 : `Pedidos ${activeFilter} aparecerão nesta seção`
               }
             </p>
@@ -246,9 +264,10 @@ export const KDSApp: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {filteredOrders.map((order) => (
               <UnifiedOrderTicket 
-                key={order.id} 
+                key={`${station}-${order.id}`} 
                 order={order} 
                 onStatusUpdate={handleStatusUpdate}
+                stationFilter={station}
                 tables={state.tables.map(t => ({ id: t.id, number: t.number }))}
                 seats={state.seats.map(s => ({ id: s.id, guestName: s.guestName, seatNumber: s.seatNumber }))}
               />

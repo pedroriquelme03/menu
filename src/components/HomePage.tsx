@@ -99,10 +99,16 @@ export const HomePage: React.FC = () => {
           </div>
         </div>
 
-        <div className="mx-auto mt-8 max-w-2xl text-center">
+        <div className="mx-auto mt-8 flex max-w-2xl flex-col items-center gap-3 sm:flex-row sm:justify-center">
+          <Link
+            to="/delivery"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#ea1d2c] px-6 py-3 text-base font-semibold text-white shadow-sm transition-colors hover:bg-red-700 sm:w-auto"
+          >
+            Pedir delivery
+          </Link>
           <Link
             to="/reserva"
-            className="inline-flex items-center gap-2 rounded-xl border border-orange-200 bg-white px-6 py-3 text-base font-semibold text-orange-700 shadow-sm transition-colors hover:bg-orange-50"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-orange-200 bg-white px-6 py-3 text-base font-semibold text-orange-700 shadow-sm transition-colors hover:bg-orange-50 sm:w-auto"
           >
             Solicitar reserva de mesa
           </Link>

@@ -127,6 +127,9 @@ export const MenuManagement: React.FC = () => {
                   Categoria
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Destino
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Preço
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -167,6 +170,17 @@ export const MenuManagement: React.FC = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
                         {item.category}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                          item.station === 'cambuza'
+                            ? 'bg-sky-100 text-sky-800'
+                            : 'bg-orange-100 text-orange-800'
+                        }`}
+                      >
+                        {item.station === 'cambuza' ? 'Cambuza' : 'Cozinha'}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
@@ -218,7 +232,7 @@ export const MenuManagement: React.FC = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
+                  <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
                     <div className="flex flex-col items-center">
                       <Utensils className="w-12 h-12 text-gray-300 mb-3" />
                       <p className="text-lg font-medium">Nenhum item encontrado</p>

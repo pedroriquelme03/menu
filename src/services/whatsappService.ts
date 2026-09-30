@@ -67,18 +67,8 @@ export class WhatsAppService {
   }
 
   // ===== DATABASE OPERATIONS =====
-  static async getWhatsAppOrders(): Promise<WhatsAppOrder[]> {
-    const { data, error } = await supabase
-      .from('whatsapp_orders')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      console.error('Erro ao buscar pedidos WhatsApp:', error);
-      return [];
-    }
-
-    return data?.map(order => ({
+  private static mapOrder(order: any): WhatsAppOrder {
+    return {
       id: order.id,
       customerPhone: order.customer_phone,
       customerName: order.customer_name,
@@ -93,8 +83,74 @@ export class WhatsAppService {
       notes: order.notes,
       createdAt: new Date(order.created_at),
       updatedAt: new Date(order.updated_at),
-      estimatedDeliveryTime: order.estimated_delivery_time ? new Date(order.estimated_delivery_time) : undefined
-    })) || [];
+      estimatedDeliveryTime: order.estimated_delivery_time
+        ? new Date(order.estimated_delivery_time)
+        : undefined,
+    };
+  }
+
+  static async getWhatsAppOrders(): Promise<WhatsAppOrder[]> {
+    const { data, error } = await supabase
+      .from('whatsapp_orders')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Erro ao buscar pedidos WhatsApp:', error);
+      return [];
+    }
+
+    return data?.map((order) => this.mapOrder(order)) || [];
+  }
+
+  static async getWhatsAppOrderById(id: string): Promise<WhatsAppOrder | null> {
+    const { data, error } = await supabase
+      .from('whatsapp_orders')
+      .select('*')
+      .eq('id', id)
+      .maybeSingle();
+
+    if (error) {
+      console.error('Erro ao buscar pedido:', error);
+      return null;
+    }
+
+    return data ? this.mapOrder(data) : null;
+  }
+
+  static async createDeliveryOrder(input: {
+    customerName: string;
+    customerPhone: string;
+    customerAddress: string;
+    items: WhatsAppOrderItem[];
+    paymentMethod: 'cash' | 'card' | 'pix';
+    paymentStatus: 'pending' | 'completed' | 'failed';
+    notes?: string;
+    deliveryFee?: number;
+  }): Promise<WhatsAppOrder | null> {
+    const subtotal = input.items.reduce(
+      (sum, item) => sum + item.menuItemSnapshot.price * item.quantity,
+      0
+    );
+    const deliveryFee = input.deliveryFee ?? 5.9;
+    const order: WhatsAppOrder = {
+      id: `delivery-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      customerPhone: input.customerPhone,
+      customerName: input.customerName,
+      customerAddress: input.customerAddress,
+      items: input.items,
+      subtotal,
+      deliveryFee,
+      total: subtotal + deliveryFee,
+      status: 'pending',
+      paymentMethod: input.paymentMethod,
+      paymentStatus: input.paymentStatus,
+      notes: input.notes,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    return this.createWhatsAppOrder(order);
   }
 
   static async createWhatsAppOrder(order: WhatsAppOrder): Promise<WhatsAppOrder | null> {
@@ -194,6 +250,7 @@ export class WhatsAppService {
       description: item.description,
       price: item.price,
       category: item.category,
+      station: item.station === 'cambuza' ? 'cambuza' : 'kitchen',
       imageUrl: item.image_url,
       isAvailable: item.is_available,
       modifiers: []

@@ -20,12 +20,15 @@ export interface Seat {
   joinedAt: Date;
 }
 
+export type PrepStation = 'kitchen' | 'cambuza';
+
 export interface MenuItem {
   id: string;
   name: string;
   description: string;
   price: number;
   category: string;
+  station?: PrepStation;
   imageUrl?: string;
   isAvailable: boolean;
   modifiers?: MenuModifier[];

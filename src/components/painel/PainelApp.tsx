@@ -13,10 +13,12 @@ import {
   Users,
   Bell,
   Check,
+  Bike,
+  ChevronRight,
 } from 'lucide-react';
 
 type DisplayOrder = (Order | WhatsAppOrder) & {
-  orderType: 'table' | 'whatsapp';
+  orderType: 'table' | 'whatsapp' | 'delivery';
 };
 
 type ColumnId = 'pending' | 'preparing' | 'ready';
@@ -55,6 +57,20 @@ const COLUMNS: {
   },
 ];
 
+const NEXT_STATUS: Record<string, string | null> = {
+  pending: 'confirmed',
+  confirmed: 'preparing',
+  preparing: 'ready',
+  ready: 'delivered',
+};
+
+const NEXT_LABEL: Record<string, string> = {
+  pending: 'Confirmar',
+  confirmed: 'Preparar',
+  preparing: 'Pronto',
+  ready: 'Entregar',
+};
+
 function getElapsedMinutes(date: Date) {
   return Math.max(0, Math.floor((Date.now() - new Date(date).getTime()) / 60000));
 }
@@ -66,6 +82,13 @@ function formatElapsed(minutes: number) {
   return `${h}h ${m}m`;
 }
 
+function resolveOrderType(order: Order | WhatsAppOrder): DisplayOrder['orderType'] {
+  if ('customerPhone' in order) {
+    return order.id.startsWith('delivery-') ? 'delivery' : 'whatsapp';
+  }
+  return 'table';
+}
+
 export const PainelApp: React.FC = () => {
   const { state } = useRestaurant();
   const [tableOrders, setTableOrders] = useState<Order[]>([]);
@@ -73,6 +96,7 @@ export const PainelApp: React.FC = () => {
   const [waiterCalls, setWaiterCalls] = useState<WaiterCall[]>([]);
   const [now, setNow] = useState(new Date());
   const [lastSync, setLastSync] = useState<Date | null>(null);
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   const loadOrders = async () => {
     try {
@@ -107,15 +131,60 @@ export const PainelApp: React.FC = () => {
     }
   };
 
+  const handleAdvanceStatus = async (order: DisplayOrder) => {
+    const next = NEXT_STATUS[order.status];
+    if (!next || updatingId) return;
+
+    setUpdatingId(order.id);
+    try {
+      if (order.orderType === 'table') {
+        const success = await DatabaseService.updateOrderStatus(order.id, next);
+        if (success) {
+          setTableOrders((prev) =>
+            prev.map((item) =>
+              item.id === order.id
+                ? {
+                    ...item,
+                    status: next as Order['status'],
+                    updatedAt: new Date(),
+                    chaseAlert: false,
+                  }
+                : item
+            )
+          );
+        }
+      } else {
+        const success = await WhatsAppService.updateWhatsAppOrderStatus(order.id, next);
+        if (success) {
+          setWhatsappOrders((prev) =>
+            prev.map((item) =>
+              item.id === order.id
+                ? { ...item, status: next as WhatsAppOrder['status'], updatedAt: new Date() }
+                : item
+            )
+          );
+        }
+      }
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
   const allOrders: DisplayOrder[] = [
     ...tableOrders.map((order) => ({ ...order, orderType: 'table' as const })),
-    ...whatsappOrders.map((order) => ({ ...order, orderType: 'whatsapp' as const })),
+    ...whatsappOrders.map((order) => ({
+      ...order,
+      orderType: resolveOrderType(order),
+    })),
   ].filter((order) => !['delivered', 'cancelled'].includes(order.status));
 
   const getTitle = (order: DisplayOrder) => {
-    if (order.orderType === 'whatsapp') {
-      const wa = order as WhatsAppOrder & { orderType: 'whatsapp' };
-      return wa.customerName || `WhatsApp #${wa.id.slice(-6)}`;
+    if (order.orderType === 'delivery' || order.orderType === 'whatsapp') {
+      const wa = order as WhatsAppOrder & { orderType: 'delivery' | 'whatsapp' };
+      return (
+        wa.customerName ||
+        `${order.orderType === 'delivery' ? 'Delivery' : 'WhatsApp'} #${wa.id.slice(-6)}`
+      );
     }
     const tableOrder = order as Order & { orderType: 'table' };
     const table = state.tables.find((t) => t.id === tableOrder.tableId);
@@ -123,9 +192,13 @@ export const PainelApp: React.FC = () => {
   };
 
   const getSubtitle = (order: DisplayOrder) => {
+    if (order.orderType === 'delivery') {
+      const wa = order as WhatsAppOrder & { orderType: 'delivery' };
+      return wa.customerAddress || wa.customerPhone || 'Delivery';
+    }
     if (order.orderType === 'whatsapp') {
       const wa = order as WhatsAppOrder & { orderType: 'whatsapp' };
-      return wa.customerPhone || 'Delivery';
+      return wa.customerPhone || 'WhatsApp';
     }
     const tableOrder = order as Order & { orderType: 'table' };
     const table = state.tables.find((t) => t.id === tableOrder.tableId);
@@ -136,12 +209,13 @@ export const PainelApp: React.FC = () => {
   };
 
   const getItems = (order: DisplayOrder) => {
-    if (order.orderType === 'whatsapp') {
-      const wa = order as WhatsAppOrder & { orderType: 'whatsapp' };
+    if (order.orderType === 'whatsapp' || order.orderType === 'delivery') {
+      const wa = order as WhatsAppOrder & { orderType: 'whatsapp' | 'delivery' };
       return wa.items.map((item) => ({
         qty: item.quantity,
         name: item.menuItemSnapshot?.name || 'Item',
         notes: item.notes,
+        station: item.menuItemSnapshot?.station,
       }));
     }
     const tableOrder = order as Order & { orderType: 'table' };
@@ -149,7 +223,16 @@ export const PainelApp: React.FC = () => {
       qty: item.quantity,
       name: item.menuItemSnapshot?.name || 'Item',
       notes: item.notes,
+      station: item.menuItemSnapshot?.station,
     }));
+  };
+
+  const OrderIcon = ({ type }: { type: DisplayOrder['orderType'] }) => {
+    if (type === 'delivery') return <Bike className="h-5 w-5 shrink-0 text-rose-400" />;
+    if (type === 'whatsapp') {
+      return <MessageCircle className="h-5 w-5 shrink-0 text-emerald-400" />;
+    }
+    return <Users className="h-5 w-5 shrink-0 text-sky-400" />;
   };
 
   const clock = now.toLocaleTimeString('pt-BR', {
@@ -181,7 +264,9 @@ export const PainelApp: React.FC = () => {
           {waiterCalls.length > 0 && (
             <div className="hidden text-right md:block">
               <p className="text-xs uppercase tracking-wider text-rose-400">Chamar garçom</p>
-              <p className="text-3xl font-bold tabular-nums text-rose-400">{waiterCalls.length}</p>
+              <p className="text-3xl font-bold tabular-nums text-rose-400">
+                {waiterCalls.length}
+              </p>
             </div>
           )}
           <div className="hidden text-right sm:block">
@@ -220,9 +305,7 @@ export const PainelApp: React.FC = () => {
               key={column.id}
               className="flex min-h-0 flex-col overflow-hidden rounded-3xl border border-slate-800 bg-slate-900/80"
             >
-              <div
-                className={`flex items-center justify-between px-5 py-4 ${column.header}`}
-              >
+              <div className={`flex items-center justify-between px-5 py-4 ${column.header}`}>
                 <div className="flex items-center gap-3">
                   <Icon className="h-6 w-6" />
                   <h2 className="text-xl font-bold lg:text-2xl">{column.label}</h2>
@@ -242,6 +325,7 @@ export const PainelApp: React.FC = () => {
                     const elapsed = getElapsedMinutes(order.createdAt);
                     const urgent = elapsed >= 15;
                     const items = getItems(order);
+                    const nextLabel = NEXT_LABEL[order.status];
 
                     return (
                       <article
@@ -253,11 +337,7 @@ export const PainelApp: React.FC = () => {
                         <div className="mb-3 flex items-start justify-between gap-3">
                           <div className="min-w-0">
                             <div className="mb-1 flex items-center gap-2">
-                              {order.orderType === 'whatsapp' ? (
-                                <MessageCircle className="h-5 w-5 shrink-0 text-emerald-400" />
-                              ) : (
-                                <Users className="h-5 w-5 shrink-0 text-sky-400" />
-                              )}
+                              <OrderIcon type={order.orderType} />
                               <h3 className="truncate text-xl font-bold lg:text-2xl">
                                 {getTitle(order)}
                               </h3>
@@ -279,11 +359,23 @@ export const PainelApp: React.FC = () => {
 
                         <ul className="space-y-2">
                           {items.map((item, index) => (
-                            <li key={`${order.id}-item-${index}`} className="text-base lg:text-lg">
+                            <li
+                              key={`${order.id}-item-${index}`}
+                              className="text-base lg:text-lg"
+                            >
                               <span className="mr-2 inline-flex min-w-[2rem] justify-center rounded-md bg-slate-950/60 px-2 py-0.5 font-bold text-sky-300">
                                 {item.qty}x
                               </span>
                               <span className="font-medium text-slate-100">{item.name}</span>
+                              <span
+                                className={`ml-2 rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ${
+                                  item.station === 'cambuza'
+                                    ? 'bg-cyan-500/20 text-cyan-300'
+                                    : 'bg-orange-500/20 text-orange-300'
+                                }`}
+                              >
+                                {item.station === 'cambuza' ? 'Cambuza' : 'Cozinha'}
+                              </span>
                               {item.notes && (
                                 <p className="mt-0.5 pl-10 text-sm italic text-amber-300">
                                   {item.notes}
@@ -297,6 +389,32 @@ export const PainelApp: React.FC = () => {
                           <p className="mt-3 rounded-xl bg-amber-500/15 px-3 py-2 text-sm text-amber-200">
                             Obs: {order.notes}
                           </p>
+                        )}
+
+                        {order.orderType !== 'table' &&
+                          'paymentStatus' in order &&
+                          order.paymentStatus && (
+                            <p className="mt-2 text-xs text-slate-400">
+                              Pagamento:{' '}
+                              {order.paymentStatus === 'completed'
+                                ? 'confirmado'
+                                : order.paymentStatus === 'failed'
+                                  ? 'falhou'
+                                  : 'pendente'}
+                              {order.paymentMethod ? ` · ${order.paymentMethod}` : ''}
+                            </p>
+                          )}
+
+                        {nextLabel && (
+                          <button
+                            type="button"
+                            disabled={updatingId === order.id}
+                            onClick={() => handleAdvanceStatus(order)}
+                            className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-white/10 px-3 py-2.5 text-sm font-semibold text-white transition hover:bg-white/20 disabled:opacity-50"
+                          >
+                            {nextLabel}
+                            <ChevronRight className="h-4 w-4" />
+                          </button>
                         )}
                       </article>
                     );

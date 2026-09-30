@@ -142,6 +142,26 @@ export const AdminApp: React.FC = () => {
           {!sidebarCollapsed && <span>Abrir Caixa</span>}
         </Link>
         <Link
+          to="/delivery"
+          title={sidebarCollapsed ? 'Delivery' : undefined}
+          className={`flex w-full items-center rounded-xl px-3 py-2.5 text-sm font-medium text-rose-700 transition-colors hover:bg-rose-50 ${
+            sidebarCollapsed ? 'justify-center' : 'gap-3'
+          }`}
+        >
+          <ExternalLink className="h-4 w-4 shrink-0" />
+          {!sidebarCollapsed && <span>Delivery</span>}
+        </Link>
+        <Link
+          to="/cambuza"
+          title={sidebarCollapsed ? 'Cambuza' : undefined}
+          className={`flex w-full items-center rounded-xl px-3 py-2.5 text-sm font-medium text-cyan-700 transition-colors hover:bg-cyan-50 ${
+            sidebarCollapsed ? 'justify-center' : 'gap-3'
+          }`}
+        >
+          <ExternalLink className="h-4 w-4 shrink-0" />
+          {!sidebarCollapsed && <span>Cambuza</span>}
+        </Link>
+        <Link
           to="/painel"
           title={sidebarCollapsed ? 'Painel TV' : undefined}
           className={`flex w-full items-center rounded-xl px-3 py-2.5 text-sm font-medium text-sky-700 transition-colors hover:bg-sky-50 ${

@@ -32,6 +32,7 @@ CREATE TABLE IF NOT EXISTS menu_items (
   description TEXT,
   price DECIMAL(10,2) NOT NULL,
   category TEXT NOT NULL,
+  station TEXT NOT NULL DEFAULT 'kitchen' CHECK (station IN ('kitchen', 'cambuza')),
   image_url TEXT,
   is_available BOOLEAN NOT NULL DEFAULT true,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -237,3 +238,37 @@ DROP POLICY IF EXISTS "Allow public insert reservations" ON reservations;
 CREATE POLICY "Allow public insert reservations" ON reservations FOR INSERT WITH CHECK (true);
 DROP POLICY IF EXISTS "Allow public update reservations" ON reservations;
 CREATE POLICY "Allow public update reservations" ON reservations FOR UPDATE USING (true);
+
+-- Contas SaaS / trial
+CREATE TABLE IF NOT EXISTS accounts (
+  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  restaurant_name TEXT NOT NULL,
+  owner_name TEXT NOT NULL,
+  phone TEXT,
+  email TEXT NOT NULL,
+  plan_id TEXT NOT NULL CHECK (plan_id IN ('essencial', 'profissional', 'completo')),
+  trial_starts_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  trial_ends_at TIMESTAMPTZ NOT NULL DEFAULT (NOW() + INTERVAL '15 days'),
+  subscription_status TEXT NOT NULL DEFAULT 'trialing'
+    CHECK (subscription_status IN ('trialing', 'active', 'past_due', 'canceled', 'expired')),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_accounts_plan_id ON accounts(plan_id);
+CREATE INDEX IF NOT EXISTS idx_accounts_trial_ends_at ON accounts(trial_ends_at);
+
+ALTER TABLE accounts ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Users can read own account" ON accounts;
+CREATE POLICY "Users can read own account"
+  ON accounts FOR SELECT TO authenticated USING (auth.uid() = id);
+
+DROP POLICY IF EXISTS "Users can insert own account" ON accounts;
+CREATE POLICY "Users can insert own account"
+  ON accounts FOR INSERT TO authenticated WITH CHECK (auth.uid() = id);
+
+DROP POLICY IF EXISTS "Users can update own account" ON accounts;
+CREATE POLICY "Users can update own account"
+  ON accounts FOR UPDATE TO authenticated USING (auth.uid() = id) WITH CHECK (auth.uid() = id);
+

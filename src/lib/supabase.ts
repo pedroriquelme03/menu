@@ -2,9 +2,9 @@ import { createClient } from '@supabase/supabase-js';
 import { environment } from '../config/environment';
 
 const supabaseUrl =
-  import.meta.env.VITE_SUPABASE_URL || environment.supabase.url;
+  import.meta.env.VITE_SUPABASE_URL || environment.supabase.url || '';
 const supabaseAnonKey =
-  import.meta.env.VITE_SUPABASE_ANON_KEY || environment.supabase.anonKey;
+  import.meta.env.VITE_SUPABASE_ANON_KEY || environment.supabase.anonKey || '';
 
 if (!supabaseUrl || !supabaseAnonKey) {
   console.error(
@@ -12,7 +12,11 @@ if (!supabaseUrl || !supabaseAnonKey) {
   );
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Evita crash de tela branca se as envs estiverem ausentes
+export const supabase = createClient(
+  supabaseUrl || 'https://placeholder.supabase.co',
+  supabaseAnonKey || 'placeholder-anon-key'
+);
 
 // Tipos para as tabelas do Supabase
 export interface Database {
@@ -89,6 +93,7 @@ export interface Database {
           description: string;
           price: number;
           category: string;
+          station?: 'kitchen' | 'cambuza';
           image_url?: string;
           is_available: boolean;
           created_at: string;
@@ -99,6 +104,7 @@ export interface Database {
           description: string;
           price: number;
           category: string;
+          station?: 'kitchen' | 'cambuza';
           image_url?: string;
           is_available?: boolean;
           created_at?: string;
@@ -109,6 +115,7 @@ export interface Database {
           description?: string;
           price?: number;
           category?: string;
+          station?: 'kitchen' | 'cambuza';
           image_url?: string;
           is_available?: boolean;
           created_at?: string;
