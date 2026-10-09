@@ -35,7 +35,8 @@ type RestaurantAction =
   | { type: 'LOAD_DATA'; payload: RestaurantState }
   | { type: 'SET_ORDERS'; payload: Order[] }
   | { type: 'SET_TABLES'; payload: Table[] }
-  | { type: 'SET_SEATS'; payload: Seat[] };
+  | { type: 'SET_SEATS'; payload: Seat[] }
+  | { type: 'SET_MENU'; payload: MenuItem[] };
 
 const initialState: RestaurantState = {
   tables: [],
@@ -60,6 +61,9 @@ const restaurantReducer = (state: RestaurantState, action: RestaurantAction): Re
 
     case 'SET_SEATS':
       return { ...state, seats: action.payload };
+
+    case 'SET_MENU':
+      return { ...state, menu: action.payload };
     
     case 'SET_CURRENT_SEAT':
       return { ...state, currentSeat: action.payload };

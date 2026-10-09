@@ -16,6 +16,7 @@ import { HomePage } from './components/HomePage';
 import { SignupPage } from './components/auth/SignupPage';
 import { LoginPage } from './components/auth/LoginPage';
 import { AccountPage } from './components/auth/AccountPage';
+import { PublicMenuPage } from './components/cardapio/PublicMenuPage';
 import { Toaster } from './components/ui/Toaster';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
@@ -28,6 +29,7 @@ function App() {
             <div className="min-h-screen bg-gray-50">
               <Routes>
                 <Route path="/" element={<LandingPage />} />
+                <Route path="/cardapio" element={<PublicMenuPage />} />
                 <Route path="/cadastro" element={<SignupPage />} />
                 <Route path="/entrar" element={<LoginPage />} />
                 <Route path="/conta" element={<AccountPage />} />
@@ -38,9 +40,9 @@ function App() {
                 <Route path="/recepcao" element={<ReceptionApp />} />
                 <Route path="/garcom" element={<WaiterApp />} />
                 <Route path="/table/:tableToken" element={<ClientApp />} />
-              <Route path="/kds" element={<KDSApp station="kitchen" />} />
-              <Route path="/cambuza" element={<KDSApp station="cambuza" />} />
-              <Route path="/caixa" element={<CaixaApp />} />
+                <Route path="/kds" element={<KDSApp station="kitchen" />} />
+                <Route path="/cambuza" element={<KDSApp station="cambuza" />} />
+                <Route path="/caixa" element={<CaixaApp />} />
                 <Route path="/painel" element={<PainelApp />} />
                 <Route path="/admin" element={<AdminApp />} />
               </Routes>

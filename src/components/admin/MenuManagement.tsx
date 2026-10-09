@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Plus, Edit, Trash2, Eye, EyeOff, Utensils } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Plus, Edit, Trash2, Eye, EyeOff, Utensils, RefreshCw } from 'lucide-react';
 import { MenuItem } from '../../types';
 import { useRestaurant } from '../../contexts/RestaurantContext';
 import { MenuItemModal } from './MenuItemModal';
@@ -11,6 +11,23 @@ export const MenuManagement: React.FC = () => {
   const [itemToEdit, setItemToEdit] = useState<MenuItem | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('Todas');
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const reloadMenu = async () => {
+    setIsRefreshing(true);
+    try {
+      const items = await DatabaseService.getMenuItems();
+      dispatch({ type: 'SET_MENU', payload: items });
+    } catch (error) {
+      console.error('Erro ao recarregar cardápio:', error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    reloadMenu();
+  }, []);
 
   // Obter categorias únicas
   const categories = ['Todas', ...Array.from(new Set(state.menu.map(item => item.category)))];
@@ -60,13 +77,24 @@ export const MenuManagement: React.FC = () => {
           <Utensils className="w-8 h-8 text-orange-600" />
           Gerenciar Cardápio
         </h1>
-        <button
-          onClick={() => setShowCreateModal(true)}
-          className="bg-green-600 text-white px-6 py-3 rounded-xl hover:bg-green-700 transition-colors flex items-center gap-2 font-semibold"
-        >
-          <Plus className="w-5 h-5" />
-          Novo Item
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={reloadMenu}
+            disabled={isRefreshing}
+            className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-3 font-semibold text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50"
+          >
+            <RefreshCw className={`h-5 w-5 ${isRefreshing ? 'animate-spin' : ''}`} />
+            Atualizar
+          </button>
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="bg-green-600 text-white px-6 py-3 rounded-xl hover:bg-green-700 transition-colors flex items-center gap-2 font-semibold"
+          >
+            <Plus className="w-5 h-5" />
+            Novo Item
+          </button>
+        </div>
       </div>
 
       {/* Filtros */}

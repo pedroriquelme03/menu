@@ -230,6 +230,7 @@ export const LandingPage: React.FC = () => {
         <div className="landing-wrap landing-footer-inner">
           <p className="landing-brand landing-brand-sm">QeeL</p>
           <div className="landing-footer-links">
+            <Link to="/cardapio">Cardápio</Link>
             <Link to="/cadastro">Teste grátis</Link>
             <Link to="/entrar">Entrar</Link>
             <Link to="/salao">Salão</Link>
