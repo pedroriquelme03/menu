@@ -1,0 +1,738 @@
+[
+  {
+    "name": "Brusqueta Caprese",
+    "description": "Fatias de pães artesanais, muçarela de búfala, tomate cereja, manjericão e molho pesto.",
+    "price": 49,
+    "category": "Pratos",
+    "station": "kitchen",
+    "is_available": true
+  },
+  {
+    "name": "Brusqueta Brie com Damasco",
+    "description": "Fatias de pães artesanais, geleia caseira de damasco, queijo brie e nozes.",
+    "price": 56,
+    "category": "Pratos",
+    "station": "kitchen",
+    "is_available": true
+  },
+  {
+    "name": "Ceviche de Salmão",
+    "description": "Dadinhos de salmão marinados no limão, gengibre, cebola roxa e pimenta.",
+    "price": 58,
+    "category": "Pratos",
+    "station": "kitchen",
+    "is_available": true
+  },
+  {
+    "name": "Carpaccio Clássico",
+    "description": "Lâminas de carne regadas ao azeite de oliva extra virgem, rúcula, alcaparras, parmesão e mostarda servidas com torradas.",
+    "price": 106,
+    "category": "Pratos",
+    "station": "kitchen",
+    "is_available": true
+  },
+  {
+    "name": "Carpaccio de Salmão",
+    "description": "Lâminas de salmão, redução de vinho tinto, manga, morangos, molho especial e brotos.",
+    "price": 79,
+    "category": "Pratos",
+    "station": "kitchen",
+    "is_available": true
+  },
+  {
+    "name": "Salada Vivaz",
+    "description": "Tiras de frango grelhado, folhas verdes e tomate cereja, marinados no azeite de oliva extra virgem, queijo branco e mix de sementes de girassol, linhaça dourada, gergelim e quinoa.",
+    "price": 36,
+    "category": "Saladas",
+    "station": "kitchen",
+    "is_available": true
+  },
+  {
+    "name": "Salada Caprese",
+    "description": "Mix de folhas verdes frescas, tomate, mussarela de búfula, manjericão e molho pesto.",
+    "price": 30,
+    "category": "Saladas",
+    "station": "kitchen",
+    "is_available": true
+  },
+  {
+    "name": "Salada Tropical",
+    "description": "Salmão em cubos grelhados, frutas tropicais, hortelã e suco de limão siciliano.",
+    "price": 42,
+    "category": "Saladas",
+    "station": "kitchen",
+    "is_available": true
+  },
+  {
+    "name": "Canja Brasileira",
+    "description": "Filé de frango desfiado, legumes selecionados e arroz branco.",
+    "price": 32,
+    "category": "Sopas",
+    "station": "kitchen",
+    "is_available": true
+  },
+  {
+    "name": "Creme de Palmito",
+    "description": "Creme de palmito pupunha, ao toque de azeite de oliva extra virgem e temperos.",
+    "price": 37,
+    "category": "Sopas",
+    "station": "kitchen",
+    "is_available": true
+  },
+  {
+    "name": "Filé Vivaz",
+    "description": "Dois medalhões de filé mignon grelhados no azeite de oliva extra virgem, molho de cogumelos frescos, servidos com nhoque de batata e fonduta de parmigiano.",
+    "price": 128,
+    "category": "Carnes",
+    "station": "kitchen",
+    "is_available": true
+  },
+  {
+    "name": "Ancho ao Chimichurri",
+    "description": "Tradicional na Argentina, retirado da parte nobre do contra filé. Servido com aligot de mandioquinha e bacon.",
+    "price": 108,
+    "category": "Carnes",
+    "station": "kitchen",
+    "is_available": true
+  },
+  {
+    "name": "Assado de Tiras",
+    "description": "Suculenta costela angus, cortada transversalmente aos ossos, em tiras, com cogumelos assados.",
+    "price": 127,
+    "category": "Carnes",
+    "station": "kitchen",
+    "is_available": true
+  },
+  {
+    "name": "Peixe à Brasileira",
+    "description": "Surubi grelhado, molho de moqueca com camarões, farofa de castanhas e banana da terra.",
+    "price": 121,
+    "category": "Peixes",
+    "station": "kitchen",
+    "is_available": true
+  },
+  {
+    "name": "Salmão ao Limone",
+    "description": "Salmão grelhado no azeite de oliva extra virgem e molho de laranja, servidos com risoto de limão siciliano.",
+    "price": 108,
+    "category": "Peixes",
+    "station": "kitchen",
+    "is_available": true
+  },
+  {
+    "name": "Frango à Parmegiana",
+    "description": "Filé de frango empanado, molho pomodoro e queijo mussarela gratinado. Acompanha arroz branco e fritas.",
+    "price": 75,
+    "category": "Aves",
+    "station": "kitchen",
+    "is_available": true
+  },
+  {
+    "name": "Frango Light",
+    "description": "Filé de frango grelhado, harmonizado com um delicioso mix de legumes, proporcionando uma opção leve e saudável.",
+    "price": 69,
+    "category": "Aves",
+    "station": "kitchen",
+    "is_available": true
+  },
+  {
+    "name": "Tagliatelle ao Creme de Cogumelos",
+    "description": "Massa Grano Duro, com um delicioso molho de cogumelos frescos, finalizado com parmesão ralado.",
+    "price": 78,
+    "category": "Massas",
+    "station": "kitchen",
+    "is_available": true
+  },
+  {
+    "name": "Espaguete",
+    "description": "Delicioso espaguete com molho a sua escolha. Opções: bolonhesa, pomodoro ou queijos.",
+    "price": 67,
+    "category": "Massas",
+    "station": "kitchen",
+    "is_available": true
+  },
+  {
+    "name": "Sorrentino de Mussarela e Tomate Seco",
+    "description": "Massa caseira recheada ao molho rosé.",
+    "price": 77,
+    "category": "Massas",
+    "station": "kitchen",
+    "is_available": true
+  },
+  {
+    "name": "Risoto de Funghi",
+    "description": "Arroz carnaroli, funghi salteado no vinho branco, azeite de oliva, queijo parmesão ralado e manteiga.",
+    "price": 97,
+    "category": "Risotos",
+    "station": "kitchen",
+    "is_available": true
+  },
+  {
+    "name": "Risoto de Camarão",
+    "description": "Arroz carnaroli, camarões puxados no azeite de ervas, flambados ao vinho branco, queijo parmesão ralado, manteiga e raspas de limão siciliano.",
+    "price": 147,
+    "category": "Risotos",
+    "station": "kitchen",
+    "is_available": true
+  },
+  {
+    "name": "Di Zucchini",
+    "description": "Arroz carnaroli, abobrinha, tomate confitado, alho poró, vinho branco, manteiga e queijo parmesão.",
+    "price": 82,
+    "category": "Risotos",
+    "station": "kitchen",
+    "is_available": true
+  },
+  {
+    "name": "Petit Gateau",
+    "description": "Clássico e especial! Bolinho de chocolate, servido com sorvete artesanal de baunilha.",
+    "price": 26,
+    "category": "Sobremesas",
+    "station": "kitchen",
+    "is_available": true
+  },
+  {
+    "name": "Pudim",
+    "description": "Fatia da famosa sobremesa a base de leite condensado, servida com doce de leite caseiro.",
+    "price": 19,
+    "category": "Sobremesas",
+    "station": "kitchen",
+    "is_available": true
+  },
+  {
+    "name": "Sorvete",
+    "description": "Duas bolas do nosso delicioso sorvete, nos sabores de: baunilha, chocolate, morango ou coco. Escolha seus sabores preferidos!",
+    "price": 18,
+    "category": "Sobremesas",
+    "station": "kitchen",
+    "is_available": true
+  },
+  {
+    "name": "Brownie de Chocolate",
+    "description": "Um delicioso brownie de chocolate com castanhas, servido com sorvete de baunilha e calda de frutas vermelhas.",
+    "price": 23,
+    "category": "Sobremesas",
+    "station": "kitchen",
+    "is_available": true
+  },
+  {
+    "name": "Gelato de Cupuaçu",
+    "description": "Sorbet de cupuaçu e manga caseiro com crumble de castanhas. Sem adição de laticícios.",
+    "price": 32,
+    "category": "Sobremesas",
+    "station": "kitchen",
+    "is_available": true
+  },
+  {
+    "name": "Café Expresso",
+    "description": "Café Expresso",
+    "price": 8,
+    "category": "Cafés e Chás",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Café Expresso Duplo",
+    "description": "Café Expresso Duplo",
+    "price": 14,
+    "category": "Cafés e Chás",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Café Expresso com leite",
+    "description": "Café Expresso com leite",
+    "price": 10,
+    "category": "Cafés e Chás",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Cappuccino",
+    "description": "Cappuccino",
+    "price": 14,
+    "category": "Cafés e Chás",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Chocolate",
+    "description": "Quente ou frio.",
+    "price": 10,
+    "category": "Cafés e Chás",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Chá diversos",
+    "description": "Chá diversos",
+    "price": 10,
+    "category": "Cafés e Chás",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Água Mineral",
+    "description": "510ml",
+    "price": 7,
+    "category": "Bebidas",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Água Mineral c/ gás",
+    "description": "510ml",
+    "price": 7,
+    "category": "Bebidas",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Água Saborizada",
+    "description": "510ml",
+    "price": 11,
+    "category": "Bebidas",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Chá Gelado",
+    "description": "450ml",
+    "price": 13,
+    "category": "Bebidas",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Refrigerante",
+    "description": "Coca Cola, Coca Cola Zero, Fanta laranja, Guaraná Antarctica, Guaraná Antarctica Zero, Sprite, Schweppes Citrus, Água Tônica.",
+    "price": 10,
+    "category": "Bebidas",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Energético",
+    "description": "250ml",
+    "price": 27,
+    "category": "Bebidas",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Soda Italiana",
+    "description": "Monin, água com gás e gelo. Escolha entre: Morango ou Maçã verde, (350ml).",
+    "price": 23,
+    "category": "Bebidas",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Suco de Uva Integral",
+    "description": "300ml",
+    "price": 23,
+    "category": "Sucos",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Suco Natural",
+    "description": "Laranja, abacaxi, limão, melancia ou maracujá. Polpas: morango ou acerola. Adicional de leite: R$3,00 - Adicional de +1 fruta: R$3,00. 220ml",
+    "price": 12,
+    "category": "Sucos",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Coquetel de Frutas",
+    "description": "Um verdadeiro samba de sabores com suco de laranja, abacaxi, maracujá, leite condensado e grenadine.",
+    "price": 25,
+    "category": "Sucos Especiais",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Abacaxi Tropical",
+    "description": "Muito sabor servido com abacaxi, hortelã e água de coco. 300ml",
+    "price": 26,
+    "category": "Sucos Especiais",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Aperol Sprits",
+    "description": "Aperol, prossecco, água com gás e fatias de laranja.",
+    "price": 32,
+    "category": "Coquetéis",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Mojito",
+    "description": "Clássica e saborosa combinação de rum, suco de limão, água com gás, hortelã e açúcar.",
+    "price": 30,
+    "category": "Coquetéis",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Margarita",
+    "description": "Os sabores ousados e marcantes da tequila, Cointreau e suco de limão.",
+    "price": 34,
+    "category": "Coquetéis",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Negroni",
+    "description": "Campari, gin nacional, vermute rosso finalizado com casca de laranja.",
+    "price": 32,
+    "category": "Coquetéis",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Dry Martini",
+    "description": "Clássico e refinado, feito com Martini Dry, gin, raspas de limão e azeitona.",
+    "price": 30,
+    "category": "Coquetéis",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Gin Tônica importada",
+    "description": "Clássica combinada de gin importado, especiarias e água tônica.",
+    "price": 42,
+    "category": "Coquetéis",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Gin Tônica nacional",
+    "description": "Clássica combinação de gin nacional especiarias e água tônica.",
+    "price": 32,
+    "category": "Coquetéis",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Frutas Vermelhas",
+    "description": "Refrescante e saborosa combinação de morango, amora e framboesa. Escolha entre vodka importada ou cachaça real. Escolha entre vodka importada ou cachaça real. 70ml de dose alcoólica.",
+    "price": 34,
+    "category": "Caipirinhas Especiais",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Caipirinha de Açai",
+    "description": "O verdadeiro sabor brasileiro. Açai, limão e muito gelo. Escolha entre vodka importada ou cachaça real. 70ml de dose alcoólica.",
+    "price": 34,
+    "category": "Caipirinhas Especiais",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Caipirinha de Cachaça Tradicional",
+    "description": "Escolha 1 das frutas da estação. Adicional de +1 fruta: R$3,00.",
+    "price": 23,
+    "category": "Caipirinhas",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Caipirinha Real",
+    "description": "Cachaça especial. Escolha 1 das frutas da estação.",
+    "price": 25,
+    "category": "Caipirinhas",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Caipiroska com Vodka Nacional",
+    "description": "Escolha 1 das frutas da estação. Adicional de +1 fruta: R$3,00.",
+    "price": 25,
+    "category": "Caipirinhas",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Caipiroska com Vodka Importada",
+    "description": "Escolha 1 das frutas da estação.",
+    "price": 34,
+    "category": "Caipirinhas",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Caipiríssima",
+    "description": "Escolha 1 das frutas da estação. Adicional de +1 fruta: R$3,00.",
+    "price": 25,
+    "category": "Caipirinhas",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Saquerinha",
+    "description": "Escolha 1 das frutas da estação.Adicional de +1 fruta: R$3,00. Sake",
+    "price": 25,
+    "category": "Caipirinhas",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Cachaça Prata",
+    "description": "Dose(50ml)",
+    "price": 9,
+    "category": "Destilados",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Cachaça Envelhecida",
+    "description": "Dose(50ml)",
+    "price": 9,
+    "category": "Destilados",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Vodka importada",
+    "description": "Dose(50ml)",
+    "price": 25,
+    "category": "Destilados",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Gin Importado",
+    "description": "Dose(50ml)",
+    "price": 28,
+    "category": "Destilados",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Rum Bacardi Carta Branca",
+    "description": "Dose(50ml)",
+    "price": 15,
+    "category": "Destilados",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Rum Bacardi Ouro",
+    "description": "Dose(50ml)",
+    "price": 15,
+    "category": "Destilados",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Campari",
+    "description": "Dose(50ml)",
+    "price": 15,
+    "category": "Destilados",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Martini Bianco",
+    "description": "Dose(50ml)",
+    "price": 16,
+    "category": "Destilados",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Martini Dry",
+    "description": "Dose(50ml)",
+    "price": 16,
+    "category": "Destilados",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Tequila Gold",
+    "description": "Dose(50ml)",
+    "price": 30,
+    "category": "Destilados",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Tequila Prata",
+    "description": "Dose(50ml)",
+    "price": 30,
+    "category": "Destilados",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Amarula Licor",
+    "description": "Dose(50ml)",
+    "price": 32,
+    "category": "Licores",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Licor 43",
+    "description": "Dose(50ml)",
+    "price": 38,
+    "category": "Licores",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Johnnie Walker Red Label",
+    "description": "Dose(50ml)",
+    "price": 29,
+    "category": "Whisky",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Johnnie Walker Black Label",
+    "description": "Dose(50ml)",
+    "price": 34,
+    "category": "Whisky",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Chivas Regal",
+    "description": "Dose(50ml)",
+    "price": 36,
+    "category": "Whisky",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Jack Daniel’s",
+    "description": "Dose(50ml)",
+    "price": 36,
+    "category": "Whisky",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Old Parr",
+    "description": "Dose(50ml)",
+    "price": 39,
+    "category": "Whisky",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Heineken - Long neck",
+    "description": "330ml",
+    "price": 21,
+    "category": "Cervejas",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Amstel- Long Neck",
+    "description": "350ml",
+    "price": 16,
+    "category": "Cervejas",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Budweiser - Long neck",
+    "description": "330ml",
+    "price": 17,
+    "category": "Cervejas",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Stella Gold Sem Glúten",
+    "description": "Gluten-free beer 330ml",
+    "price": 25,
+    "category": "Cervejas",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Cerveja sem álcool - Lata",
+    "description": "350ml",
+    "price": 22,
+    "category": "Cervejas",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Leopoldina Witbier - 500ml",
+    "description": "Saborosa cerveja feita a partir de uma delicada seleção de malte de trigo, com aromas de temperos cítricos, como limão-siciliano e coentro. Proporciona combinações com diferentes pratos.",
+    "price": 59,
+    "category": "Cervejas Especiais",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Leopoldina Pilsner - 500ml",
+    "description": "Elaborada com maltes especiais e lúpulos da região de Pilsen, tipo lager, com aromas de notas florais. Harmoniza bem com diversos pratos.",
+    "price": 56,
+    "category": "Cervejas Especiais",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Roleta Russa Easy Ipa - 355ml",
+    "description": "De coloração amarelo-palha, aroma e sabor que remetem a frutas cítricas e tropicais. Harmoniza bem com carnes assadas, molhos cítricos e folhas fortes.",
+    "price": 28,
+    "category": "Cervejas Especiais",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Coruja American Lager - 350ml",
+    "description": "O bom e velho estilo americano, é leve e refrescante. Combina com saladas, peixes brancos e queijos suaves.",
+    "price": 21,
+    "category": "Cervejas Especiais",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Barco San Diego APA - 350ml",
+    "description": "Explosão de aromas de uma American Pale Ale, cerveja com intensas notas cítricas no aroma e sabor.",
+    "price": 28,
+    "category": "Cervejas Especiais",
+    "station": "cambuza",
+    "is_available": true
+  },
+  {
+    "name": "Iscas de Mignon",
+    "description": "130g. Inclue arroz e feijao. Escolha +2 acompanhamentos: Batata frita ou purê de batata. Salada ou legumes.",
+    "price": 55,
+    "category": "Kids",
+    "station": "kitchen",
+    "is_available": true
+  },
+  {
+    "name": "Peito de Frango grelhado",
+    "description": "130g. Inclue arroz e feijao. Escolha +2 acompanhamentos: Batata frita ou purê de batata. Salada ou legumes.",
+    "price": 42,
+    "category": "Kids",
+    "station": "kitchen",
+    "is_available": true
+  },
+  {
+    "name": "Isca de peixe",
+    "description": "130g. Inclue arroz e feijao. Escolha +2 acompanhamentos: Batata frita ou purê de batata. Salada ou legumes.",
+    "price": 45,
+    "category": "Kids",
+    "station": "kitchen",
+    "is_available": true
+  },
+  {
+    "name": "Espaguete",
+    "description": "150g. Escolha molho pomodoro ou queijo.",
+    "price": 39,
+    "category": "Kids",
+    "station": "kitchen",
+    "is_available": true
+  }
+]
