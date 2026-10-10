@@ -252,6 +252,7 @@ export class WhatsAppService {
       category: item.category,
       station: item.station === 'cambuza' ? 'cambuza' : 'kitchen',
       imageUrl: item.image_url,
+      videoUrl: item.video_url || undefined,
       isAvailable: item.is_available,
       modifiers: []
     })) || [];

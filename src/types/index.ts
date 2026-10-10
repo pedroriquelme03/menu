@@ -30,6 +30,7 @@ export interface MenuItem {
   category: string;
   station?: PrepStation;
   imageUrl?: string;
+  videoUrl?: string;
   isAvailable: boolean;
   modifiers?: MenuModifier[];
 }

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Plus, Edit, Trash2, Eye, EyeOff, Utensils, RefreshCw } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, EyeOff, Utensils, RefreshCw, Film } from 'lucide-react';
 import { MenuItem } from '../../types';
 import { useRestaurant } from '../../contexts/RestaurantContext';
 import { MenuItemModal } from './MenuItemModal';
@@ -186,7 +186,15 @@ export const MenuManagement: React.FC = () => {
                           </div>
                         )}
                         <div>
-                          <div className="text-sm font-medium text-gray-900">{item.name}</div>
+                          <div className="flex items-center gap-2 text-sm font-medium text-gray-900">
+                            {item.name}
+                            {item.videoUrl && (
+                              <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-gray-500">
+                                <Film className="h-3 w-3" />
+                                vídeo
+                              </span>
+                            )}
+                          </div>
                           {item.description && (
                             <div className="text-sm text-gray-500 truncate max-w-xs">
                               {item.description}

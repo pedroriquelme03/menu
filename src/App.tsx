@@ -17,6 +17,8 @@ import { SignupPage } from './components/auth/SignupPage';
 import { LoginPage } from './components/auth/LoginPage';
 import { AccountPage } from './components/auth/AccountPage';
 import { PublicMenuPage } from './components/cardapio/PublicMenuPage';
+import { ImageMenuPage } from './components/cardapio/ImageMenuPage';
+import { VideoMenuPage } from './components/cardapio/VideoMenuPage';
 import { Toaster } from './components/ui/Toaster';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
@@ -30,6 +32,8 @@ function App() {
               <Routes>
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/cardapio" element={<PublicMenuPage />} />
+                <Route path="/cardapio-imagem" element={<ImageMenuPage />} />
+                <Route path="/cardapio-video" element={<VideoMenuPage />} />
                 <Route path="/cadastro" element={<SignupPage />} />
                 <Route path="/entrar" element={<LoginPage />} />
                 <Route path="/conta" element={<AccountPage />} />

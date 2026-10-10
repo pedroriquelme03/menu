@@ -231,6 +231,8 @@ export const LandingPage: React.FC = () => {
           <p className="landing-brand landing-brand-sm">QeeL</p>
           <div className="landing-footer-links">
             <Link to="/cardapio">Cardápio</Link>
+            <Link to="/cardapio-imagem">Cardápio fotos</Link>
+            <Link to="/cardapio-video">Cardápio vídeos</Link>
             <Link to="/cadastro">Teste grátis</Link>
             <Link to="/entrar">Entrar</Link>
             <Link to="/salao">Salão</Link>

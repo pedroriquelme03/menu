@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { DatabaseService } from '../../services/databaseService';
 import { MenuItem } from '../../types';
 import { ArrowLeft, Search, UtensilsCrossed } from 'lucide-react';
+import { MenuFormatNav } from './MenuFormatNav';
 
 const formatPrice = (price: number) =>
   new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(price);
@@ -79,6 +80,9 @@ export const PublicMenuPage: React.FC = () => {
               Visualização pública · sem precisar escolher mesa
             </p>
           </div>
+        </div>
+        <div className="mx-auto max-w-3xl overflow-x-auto px-4 pb-3">
+          <MenuFormatNav tone="on-orange" />
         </div>
 
         <div className="mx-auto max-w-3xl px-4 pb-3">

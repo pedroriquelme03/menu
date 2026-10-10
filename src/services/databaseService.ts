@@ -218,6 +218,52 @@ export class DatabaseService {
   }
 
   // ===== MENU ITEMS =====
+  private static videoColumnAvailable: boolean | null = null;
+
+  private static mapMenuItem(item: {
+    id: string;
+    name: string;
+    description: string;
+    price: number;
+    category: string;
+    station?: string | null;
+    image_url?: string | null;
+    video_url?: string | null;
+    is_available: boolean;
+  }): MenuItem {
+    return {
+      id: item.id,
+      name: item.name,
+      description: item.description,
+      price: item.price,
+      category: item.category,
+      station: item.station === 'cambuza' ? 'cambuza' : 'kitchen',
+      imageUrl: item.image_url || undefined,
+      videoUrl: item.video_url || undefined,
+      isAvailable: item.is_available,
+      modifiers: []
+    };
+  }
+
+  private static async supportsVideoColumn(): Promise<boolean> {
+    if (this.videoColumnAvailable !== null) return this.videoColumnAvailable;
+    const { error } = await supabase.from('menu_items').select('video_url').limit(1);
+    if (!error) {
+      this.videoColumnAvailable = true;
+      return true;
+    }
+    const missing =
+      error.code === '42703' || String(error.message || '').includes('video_url');
+    if (missing) this.videoColumnAvailable = false;
+    return false;
+  }
+
+  private static videoColumnError() {
+    return new Error(
+      'A coluna de vídeo ainda não existe. Execute database/add_menu_media.sql no SQL Editor do Supabase.'
+    );
+  }
+
   static async getMenuItems(): Promise<MenuItem[]> {
     const { data, error } = await supabase
       .from('menu_items')
@@ -230,68 +276,66 @@ export class DatabaseService {
       return [];
     }
 
-    return data?.map(item => ({
-      id: item.id,
+    return data?.map((item) => this.mapMenuItem(item)) || [];
+  }
+
+  static async createMenuItem(item: Omit<MenuItem, 'id'>): Promise<MenuItem | null> {
+    const row: Record<string, unknown> = {
       name: item.name,
       description: item.description,
       price: item.price,
       category: item.category,
-      station: (item.station === 'cambuza' ? 'cambuza' : 'kitchen') as const,
-      imageUrl: item.image_url,
-      isAvailable: item.is_available,
-      modifiers: [] // Por enquanto vazio, pode ser expandido depois
-    })) || [];
-  }
+      station: item.station || 'kitchen',
+      image_url: item.imageUrl || null,
+      is_available: item.isAvailable
+    };
 
-  static async createMenuItem(item: Omit<MenuItem, 'id'>): Promise<MenuItem | null> {
+    if (await this.supportsVideoColumn()) {
+      row.video_url = item.videoUrl || null;
+    } else if (item.videoUrl) {
+      throw this.videoColumnError();
+    }
+
     const { data, error } = await supabase
       .from('menu_items')
-      .insert({
-        name: item.name,
-        description: item.description,
-        price: item.price,
-        category: item.category,
-        station: item.station || 'kitchen',
-        image_url: item.imageUrl,
-        is_available: item.isAvailable
-      })
+      .insert(row)
       .select()
       .single();
 
     if (error) {
       console.error('Erro ao criar item do menu:', error);
+      if (String(error.message).includes('video_url')) throw this.videoColumnError();
       return null;
     }
 
-    return {
-      id: data.id,
-      name: data.name,
-      description: data.description,
-      price: data.price,
-      category: data.category,
-      station: data.station === 'cambuza' ? 'cambuza' : 'kitchen',
-      imageUrl: data.image_url,
-      isAvailable: data.is_available,
-      modifiers: []
-    };
+    return this.mapMenuItem(data);
   }
 
   static async updateMenuItem(id: string, updates: Partial<MenuItem>): Promise<boolean> {
+    const row: Record<string, unknown> = {
+      name: updates.name,
+      description: updates.description,
+      price: updates.price,
+      category: updates.category,
+      station: updates.station,
+      image_url: updates.imageUrl || null,
+      is_available: updates.isAvailable
+    };
+
+    if (await this.supportsVideoColumn()) {
+      row.video_url = updates.videoUrl || null;
+    } else if (updates.videoUrl) {
+      throw this.videoColumnError();
+    }
+
     const { error } = await supabase
       .from('menu_items')
-      .update({
-        name: updates.name,
-        description: updates.description,
-        price: updates.price,
-        category: updates.category,
-        station: updates.station,
-        image_url: updates.imageUrl,
-        is_available: updates.isAvailable
-      })
+      .update(row)
       .eq('id', id);
 
     if (error) {
       console.error('Erro ao atualizar item do menu:', error);
+      if (String(error.message).includes('video_url')) throw this.videoColumnError();
       return false;
     }
 

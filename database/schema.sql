@@ -34,6 +34,7 @@ CREATE TABLE IF NOT EXISTS menu_items (
   category TEXT NOT NULL,
   station TEXT NOT NULL DEFAULT 'kitchen' CHECK (station IN ('kitchen', 'cambuza')),
   image_url TEXT,
+  video_url TEXT,
   is_available BOOLEAN NOT NULL DEFAULT true,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );

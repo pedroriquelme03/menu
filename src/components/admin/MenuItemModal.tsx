@@ -1,8 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { X, Plus, Edit, Save, ChefHat, GlassWater } from 'lucide-react';
+import { X, Plus, Edit, Save, ChefHat, GlassWater, ImagePlus, Film } from 'lucide-react';
 import { MenuItem, PrepStation } from '../../types';
 import { DatabaseService } from '../../services/databaseService';
 import { useRestaurant } from '../../contexts/RestaurantContext';
+import {
+  uploadMenuImage,
+  uploadMenuVideo,
+  loadMenuImage,
+  validateMenuVideo,
+} from '../../lib/menuMedia';
+import { ImageCropDialog } from './ImageCropDialog';
 
 interface MenuItemModalProps {
   isOpen: boolean;
@@ -37,6 +44,12 @@ export const MenuItemModal: React.FC<MenuItemModalProps> = ({
   const [category, setCategory] = useState('Pratos Principais');
   const [station, setStation] = useState<PrepStation>('kitchen');
   const [imageUrl, setImageUrl] = useState('');
+  const [videoUrl, setVideoUrl] = useState('');
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState('');
+  const [videoPreview, setVideoPreview] = useState('');
+  const [cropSource, setCropSource] = useState<string | null>(null);
   const [isAvailable, setIsAvailable] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -51,6 +64,9 @@ export const MenuItemModal: React.FC<MenuItemModalProps> = ({
       setCategory(itemToEdit.category);
       setStation(itemToEdit.station || defaultStationForCategory(itemToEdit.category));
       setImageUrl(itemToEdit.imageUrl || '');
+      setVideoUrl(itemToEdit.videoUrl || '');
+      setImagePreview(itemToEdit.imageUrl || '');
+      setVideoPreview(itemToEdit.videoUrl || '');
       setIsAvailable(itemToEdit.isAvailable);
     } else {
       setName('');
@@ -59,10 +75,27 @@ export const MenuItemModal: React.FC<MenuItemModalProps> = ({
       setCategory('Pratos Principais');
       setStation('kitchen');
       setImageUrl('');
+      setVideoUrl('');
+      setImagePreview('');
+      setVideoPreview('');
       setIsAvailable(true);
     }
+    setImageFile(null);
+    setVideoFile(null);
+    setCropSource((current) => {
+      if (current) URL.revokeObjectURL(current);
+      return null;
+    });
     setError('');
   }, [itemToEdit]);
+
+  useEffect(() => {
+    if (isOpen) return;
+    setCropSource((current) => {
+      if (current) URL.revokeObjectURL(current);
+      return null;
+    });
+  }, [isOpen]);
 
   const handleCategoryChange = (nextCategory: string) => {
     setCategory(nextCategory);
@@ -88,27 +121,29 @@ export const MenuItemModal: React.FC<MenuItemModalProps> = ({
     setError('');
 
     try {
+      let nextImage = imageUrl.trim();
+      let nextVideo = videoUrl.trim();
+      if (imageFile) nextImage = await uploadMenuImage(imageFile);
+      if (videoFile) nextVideo = await uploadMenuVideo(videoFile);
+
+      const payload = {
+        name: name.trim(),
+        description: description.trim(),
+        price: parseFloat(price),
+        category,
+        station,
+        imageUrl: nextImage || undefined,
+        videoUrl: nextVideo || undefined,
+        isAvailable
+      };
+
       if (isEditing && itemToEdit) {
-        const success = await DatabaseService.updateMenuItem(itemToEdit.id, {
-          name: name.trim(),
-          description: description.trim(),
-          price: parseFloat(price),
-          category,
-          station,
-          imageUrl: imageUrl.trim() || undefined,
-          isAvailable
-        });
+        const success = await DatabaseService.updateMenuItem(itemToEdit.id, payload);
 
         if (success) {
           const updatedItem: MenuItem = {
             ...itemToEdit,
-            name: name.trim(),
-            description: description.trim(),
-            price: parseFloat(price),
-            category,
-            station,
-            imageUrl: imageUrl.trim() || undefined,
-            isAvailable
+            ...payload
           };
 
           dispatch({ type: 'UPDATE_MENU_ITEM', payload: updatedItem });
@@ -117,15 +152,7 @@ export const MenuItemModal: React.FC<MenuItemModalProps> = ({
           setError('Erro ao atualizar item. Tente novamente.');
         }
       } else {
-        const newItem = await DatabaseService.createMenuItem({
-          name: name.trim(),
-          description: description.trim(),
-          price: parseFloat(price),
-          category,
-          station,
-          imageUrl: imageUrl.trim() || undefined,
-          isAvailable
-        });
+        const newItem = await DatabaseService.createMenuItem(payload);
 
         if (newItem) {
           dispatch({ type: 'ADD_MENU_ITEM', payload: newItem });
@@ -146,7 +173,7 @@ export const MenuItemModal: React.FC<MenuItemModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="mx-4 max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl bg-white p-6">
+      <div className="mx-4 max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6">
         <div className="mb-6 flex items-center justify-between">
           <h2 className="flex items-center gap-2 text-2xl font-bold text-gray-800">
             {isEditing ? (
@@ -272,19 +299,67 @@ export const MenuItemModal: React.FC<MenuItemModalProps> = ({
             </div>
           </div>
 
-          <div>
-            <label htmlFor="imageUrl" className="mb-2 block text-sm font-medium text-gray-700">
-              URL da Imagem (opcional)
-            </label>
-            <input
-              type="url"
-              id="imageUrl"
-              value={imageUrl}
-              onChange={(e) => setImageUrl(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500"
-              placeholder="https://exemplo.com/imagem.jpg"
-            />
-          </div>
+          <MediaPicker
+            id="item-image"
+            label="Imagem"
+            hint="JPG, PNG ou outro formato. Recorte quadrado e conversão para WebP, até 2 MB"
+            accept="image/jpeg,image/png,image/webp,image/gif,image/avif,image/bmp,.jpg,.jpeg,.png,.webp,.gif,.avif,.bmp"
+            icon="image"
+            previewUrl={imagePreview}
+            fileName={imageFile?.name}
+            onPick={(file) => {
+              void loadMenuImage(file)
+                .then((url) => {
+                  setError('');
+                  setCropSource((current) => {
+                    if (current) URL.revokeObjectURL(current);
+                    return url;
+                  });
+                })
+                .catch((err: unknown) => {
+                  setError(err instanceof Error ? err.message : 'Não foi possível abrir a imagem.');
+                });
+            }}
+            onClear={() => {
+              setImageFile(null);
+              setImageUrl('');
+              setImagePreview((current) => {
+                if (current.startsWith('blob:')) URL.revokeObjectURL(current);
+                return '';
+              });
+            }}
+          />
+
+          <MediaPicker
+            id="item-video"
+            label="Vídeo"
+            hint="Somente MP4, até 20 MB"
+            accept="video/mp4,.mp4"
+            icon="video"
+            previewUrl={videoPreview}
+            fileName={videoFile?.name}
+            onPick={(file) => {
+              const message = validateMenuVideo(file);
+              if (message) {
+                setError(message);
+                return;
+              }
+              setError('');
+              setVideoFile(file);
+              setVideoPreview((current) => {
+                if (current.startsWith('blob:')) URL.revokeObjectURL(current);
+                return URL.createObjectURL(file);
+              });
+            }}
+            onClear={() => {
+              setVideoFile(null);
+              setVideoUrl('');
+              setVideoPreview((current) => {
+                if (current.startsWith('blob:')) URL.revokeObjectURL(current);
+                return '';
+              });
+            }}
+          />
 
           <div className="flex items-center">
             <input
@@ -339,6 +414,89 @@ export const MenuItemModal: React.FC<MenuItemModalProps> = ({
           </div>
         </form>
       </div>
+      {cropSource && (
+        <ImageCropDialog
+          imageSrc={cropSource}
+          onCancel={() => {
+            setCropSource((current) => {
+              if (current) URL.revokeObjectURL(current);
+              return null;
+            });
+          }}
+          onConfirm={(file) => {
+            setImageFile(file);
+            setImagePreview((current) => {
+              if (current.startsWith('blob:')) URL.revokeObjectURL(current);
+              return URL.createObjectURL(file);
+            });
+            setCropSource((current) => {
+              if (current) URL.revokeObjectURL(current);
+              return null;
+            });
+          }}
+        />
+      )}
     </div>
   );
 };
+
+const MediaPicker: React.FC<{
+  id: string;
+  label: string;
+  hint: string;
+  accept: string;
+  icon: 'image' | 'video';
+  previewUrl: string;
+  fileName?: string;
+  onPick: (file: File) => void;
+  onClear: () => void;
+}> = ({ id, label, hint, accept, icon, previewUrl, fileName, onPick, onClear }) => (
+  <div>
+    <label htmlFor={id} className="mb-2 block text-sm font-medium text-gray-700">
+      {label}
+    </label>
+    <div className="flex items-center gap-3 rounded-xl border border-dashed border-gray-300 p-3">
+      <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-gray-100 text-gray-400">
+        {previewUrl && icon === 'image' && (
+          <img src={previewUrl} alt="" className="h-full w-full object-cover" />
+        )}
+        {previewUrl && icon === 'video' && (
+          <video src={previewUrl} className="h-full w-full object-cover" muted playsInline />
+        )}
+        {!previewUrl && (icon === 'image' ? <ImagePlus className="h-5 w-5" /> : <Film className="h-5 w-5" />)}
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-xs text-gray-500">{hint}</p>
+        {fileName && <p className="truncate text-xs font-medium text-gray-700">{fileName}</p>}
+        <div className="mt-2 flex flex-wrap gap-2">
+          <label
+            htmlFor={id}
+            className="cursor-pointer rounded-lg bg-gray-100 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-200"
+          >
+            Escolher arquivo
+          </label>
+          {previewUrl && (
+            <button
+              type="button"
+              onClick={onClear}
+              className="rounded-lg px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50"
+            >
+              Remover
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+    <input
+      id={id}
+      type="file"
+      accept={accept}
+      className="sr-only"
+      onChange={(event) => {
+        const file = event.target.files?.[0];
+        event.target.value = '';
+        if (file) onPick(file);
+      }}
+    />
+  </div>
+);

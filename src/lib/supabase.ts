@@ -95,6 +95,7 @@ export interface Database {
           category: string;
           station?: 'kitchen' | 'cambuza';
           image_url?: string;
+          video_url?: string;
           is_available: boolean;
           created_at: string;
         };
@@ -106,6 +107,7 @@ export interface Database {
           category: string;
           station?: 'kitchen' | 'cambuza';
           image_url?: string;
+          video_url?: string;
           is_available?: boolean;
           created_at?: string;
         };
@@ -117,6 +119,7 @@ export interface Database {
           category?: string;
           station?: 'kitchen' | 'cambuza';
           image_url?: string;
+          video_url?: string;
           is_available?: boolean;
           created_at?: string;
         };
