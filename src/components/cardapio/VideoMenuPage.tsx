@@ -2,40 +2,44 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Volume2, VolumeX } from 'lucide-react';
 import { MenuFormatNav } from './MenuFormatNav';
-import { usePublicMenu } from './usePublicMenu';
+import { takeShowcaseMenu, usePublicMenu } from './usePublicMenu';
 
 export const VideoMenuPage: React.FC = () => {
-  const { menu, loading, error } = usePublicMenu();
+  const { menu: fullMenu, loading, error } = usePublicMenu();
+  const menu = useMemo(() => takeShowcaseMenu(fullMenu), [fullMenu]);
   const scrollerRef = useRef<HTMLDivElement>(null);
   const soundOn = useRef(false);
   const [muted, setMuted] = useState(true);
   const [activeIndex, setActiveIndex] = useState(0);
 
-  const items = useMemo(() => menu.filter((item) => item.videoUrl), [menu]);
+  const items = menu;
 
   useEffect(() => {
     const root = scrollerRef.current;
     if (!root || items.length === 0) return;
 
-    const videos = Array.from(root.querySelectorAll('video'));
+    const slides = Array.from(root.querySelectorAll<HTMLElement>('[data-index]'));
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          const video = entry.target as HTMLVideoElement;
-          const index = Number(video.dataset.index || 0);
+          const slide = entry.target as HTMLElement;
+          const index = Number(slide.dataset.index || 0);
+          const video = slide.querySelector('video');
           if (entry.isIntersecting && entry.intersectionRatio >= 0.65) {
             setActiveIndex(index);
-            video.muted = !soundOn.current;
-            video.play().catch(() => undefined);
+            if (video) {
+              video.muted = !soundOn.current;
+              video.play().catch(() => undefined);
+            }
           } else {
-            video.pause();
+            video?.pause();
           }
         });
       },
       { root, threshold: [0.65] }
     );
 
-    videos.forEach((video) => observer.observe(video));
+    slides.forEach((slide) => observer.observe(slide));
     return () => observer.disconnect();
   }, [items]);
 
@@ -86,7 +90,7 @@ export const VideoMenuPage: React.FC = () => {
         <div className="flex h-full flex-col items-center justify-center gap-2 px-8 text-center">
           <p className="text-lg font-semibold">Nenhum vídeo no cardápio</p>
           <p className="max-w-sm text-sm text-white/70">
-            Cadastre um MP4 de até 20 MB no item, pelo painel admin, para ele aparecer aqui.
+            Os 12 itens do cardápio em foto e vídeo aparecem aqui.
           </p>
         </div>
       )}
@@ -97,16 +101,29 @@ export const VideoMenuPage: React.FC = () => {
           className="h-[100dvh] snap-y snap-mandatory overflow-y-scroll overscroll-y-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           {items.map((item, index) => (
-            <section key={item.id} className="relative h-[100dvh] w-full shrink-0 snap-start snap-always">
-              <video
-                data-index={index}
-                src={item.videoUrl}
-                className="absolute inset-0 h-full w-full object-cover"
-                playsInline
-                loop
-                muted
-                preload={index === 0 ? 'auto' : 'metadata'}
-              />
+            <section
+              key={item.id}
+              data-index={index}
+              className="relative h-[100dvh] w-full shrink-0 snap-start snap-always"
+            >
+              {item.videoUrl ? (
+                <video
+                  src={item.videoUrl}
+                  className="absolute inset-0 h-full w-full object-cover"
+                  playsInline
+                  loop
+                  muted
+                  preload={index === 0 ? 'auto' : 'metadata'}
+                />
+              ) : item.imageUrl ? (
+                <img
+                  src={item.imageUrl}
+                  alt=""
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+              ) : (
+                <div className="absolute inset-0 bg-neutral-950" />
+              )}
               <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent px-5 pb-[max(2.25rem,env(safe-area-inset-bottom))] pt-28">
                 <h2 className="max-w-[85%] text-left text-xl font-bold leading-tight">{item.name}</h2>
                 {item.description && (
@@ -125,7 +142,7 @@ export const VideoMenuPage: React.FC = () => {
         </div>
       )}
 
-      {!loading && !error && items.length > 0 && (
+      {!loading && !error && items.some((item) => item.videoUrl) && (
         <button
           type="button"
           onClick={toggleSound}

@@ -3,10 +3,11 @@ import { Link } from 'react-router-dom';
 import { ArrowLeft, ImageOff, Search } from 'lucide-react';
 import { MenuItem } from '../../types';
 import { MenuFormatNav } from './MenuFormatNav';
-import { formatMenuPrice, usePublicMenu } from './usePublicMenu';
+import { formatMenuPrice, takeShowcaseMenu, usePublicMenu } from './usePublicMenu';
 
 export const ImageMenuPage: React.FC = () => {
-  const { menu, loading, error } = usePublicMenu();
+  const { menu: fullMenu, loading, error } = usePublicMenu();
+  const menu = useMemo(() => takeShowcaseMenu(fullMenu), [fullMenu]);
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState('all');
 
