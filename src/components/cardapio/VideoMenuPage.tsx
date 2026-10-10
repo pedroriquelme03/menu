@@ -2,11 +2,11 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Volume2, VolumeX } from 'lucide-react';
 import { MenuFormatNav } from './MenuFormatNav';
-import { takeShowcaseMenu, usePublicMenu } from './usePublicMenu';
+import { usePublicMenu, withVideo } from './usePublicMenu';
 
 export const VideoMenuPage: React.FC = () => {
   const { menu: fullMenu, loading, error } = usePublicMenu();
-  const menu = useMemo(() => takeShowcaseMenu(fullMenu), [fullMenu]);
+  const menu = useMemo(() => withVideo(fullMenu), [fullMenu]);
   const scrollerRef = useRef<HTMLDivElement>(null);
   const soundOn = useRef(false);
   const [muted, setMuted] = useState(true);
@@ -90,7 +90,7 @@ export const VideoMenuPage: React.FC = () => {
         <div className="flex h-full flex-col items-center justify-center gap-2 px-8 text-center">
           <p className="text-lg font-semibold">Nenhum vídeo no cardápio</p>
           <p className="max-w-sm text-sm text-white/70">
-            Os 12 itens do cardápio em foto e vídeo aparecem aqui.
+            Os itens com vídeo cadastrado aparecem aqui.
           </p>
         </div>
       )}
