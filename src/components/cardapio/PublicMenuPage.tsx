@@ -8,8 +8,21 @@ import { MenuFormatNav } from './MenuFormatNav';
 const formatPrice = (price: number) =>
   new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(price);
 
+const ADDON_CATEGORY = 'Adicionais';
+
+// Quais adicionais (pelo nome do item em "Adicionais") cada categoria aceita.
+const ADDONS_BY_CATEGORY: Record<string, string[]> = {
+  Hambúrgueres: ['Carne Hambúrguer Extra', 'Frango Hambúrguer Extra', 'Cheddar Extra', 'Molho Extra'],
+  Sanduíches: ['Cheddar Extra', 'Molho Extra'],
+  Entradas: ['Cheddar Extra', 'Molho Extra'],
+  Asinhas: ['Molho Extra', 'Coleslaw'],
+  Refeições: ['Molho Extra', 'Coleslaw'],
+  'Pratos Especiais': ['Molho Extra', 'Coleslaw'],
+  Combos: ['Molho Extra', 'Coleslaw'],
+};
+
 export const PublicMenuPage: React.FC = () => {
-  const [menu, setMenu] = useState<MenuItem[]>([]);
+  const [allItems, setMenu] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
@@ -31,6 +44,23 @@ export const PublicMenuPage: React.FC = () => {
     };
     load();
   }, []);
+
+  const menu = useMemo(
+    () => allItems.filter((item) => item.category !== ADDON_CATEGORY),
+    [allItems]
+  );
+
+  const addonsByCategory = useMemo(() => {
+    const addons = allItems.filter((item) => item.category === ADDON_CATEGORY);
+    const map = new Map<string, MenuItem[]>();
+    Object.entries(ADDONS_BY_CATEGORY).forEach(([category, names]) => {
+      const list = names
+        .map((name) => addons.find((addon) => addon.name === name))
+        .filter((addon): addon is MenuItem => Boolean(addon));
+      if (list.length > 0) map.set(category, list);
+    });
+    return map;
+  }, [allItems]);
 
   const categories = useMemo(
     () => Array.from(new Set(menu.map((item) => item.category))),
@@ -165,6 +195,15 @@ export const PublicMenuPage: React.FC = () => {
                       </div>
                       {item.description && (
                         <p className="mt-1 text-sm text-gray-500">{item.description}</p>
+                      )}
+                      {addonsByCategory.has(category) && (
+                        <p className="mt-2 text-xs text-gray-500">
+                          <span className="font-semibold text-gray-700">Adicionais: </span>
+                          {addonsByCategory
+                            .get(category)!
+                            .map((addon) => `${addon.name} + ${formatPrice(addon.price)}`)
+                            .join(' · ')}
+                        </p>
                       )}
                     </div>
                     {item.imageUrl && (
